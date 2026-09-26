@@ -117,10 +117,10 @@
 
     const invalidActionThreshold = 3;
     const invalidActionWindow = 8000;
+    const instructionHintDismissDelay = 3000;
     let invalidActionCount = 0;
     let firstInvalidActionAt = 0;
     let hasShownInstructionHint = false;
-    let instructionHintShownAt = 0;
     let instructionHintDismissTimer = null;
     let hasReportedValidActionForHint = false;
 
@@ -662,7 +662,6 @@
             !hasShownInstructionHint
         ) {
             hasShownInstructionHint = true;
-            instructionHintShownAt = now;
             hasReportedValidActionForHint = false;
             gameStatusMessage.textContent =
                 "操作不太順利嗎？點擊「遊戲說明」查看操作方式。";
@@ -676,8 +675,7 @@
     function reportValidAction() {
         if (
             !hasShownInstructionHint ||
-            hasReportedValidActionForHint ||
-            Date.now() - instructionHintShownAt > 5000
+            hasReportedValidActionForHint
         ) {
             return;
         }
@@ -685,7 +683,7 @@
         hasReportedValidActionForHint = true;
         instructionHintDismissTimer = window.setTimeout(
             dismissInstructionHint,
-            5000
+            instructionHintDismissDelay
         );
     }
 
@@ -698,7 +696,6 @@
         invalidActionCount = 0;
         firstInvalidActionAt = 0;
         hasShownInstructionHint = false;
-        instructionHintShownAt = 0;
         hasReportedValidActionForHint = false;
 
         if (gameStatus) {
