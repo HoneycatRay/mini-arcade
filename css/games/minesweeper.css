@@ -59,8 +59,8 @@
     grid-template-columns: repeat(9, minmax(0, 1fr));
     grid-template-rows: repeat(9, minmax(0, 1fr));
     gap: clamp(2px, 0.8vw, 5px);
-    width: min(100%, 440px, calc(85vh - 220px));
-    width: min(100%, 440px, calc(85dvh - 220px));
+    width: min(100%, 440px, max(220px, calc(85vh - 220px)));
+    width: min(100%, 440px, max(220px, calc(85dvh - 220px)));
     aspect-ratio: 1;
     padding: clamp(5px, 1.5vw, 9px);
     border: 1px solid var(--border);
@@ -215,8 +215,8 @@
     }
 
     .minesweeper-board {
-        width: min(100%, 440px, calc(80vh - 230px));
-        width: min(100%, 440px, calc(80dvh - 230px));
+        width: min(100%, 440px, max(220px, calc(80vh - 230px)));
+        width: min(100%, 440px, max(220px, calc(80dvh - 230px)));
         border-radius: 14px;
     }
 }
@@ -227,7 +227,7 @@
     }
 
     .minesweeper-board {
-        width: min(100%, calc(70vh - 180px));
-        width: min(100%, calc(70dvh - 180px));
+        width: min(100%, max(220px, calc(70vh - 180px)));
+        width: min(100%, max(220px, calc(70dvh - 180px)));
     }
 }
