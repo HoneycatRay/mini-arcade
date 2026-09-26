@@ -23,6 +23,14 @@
     --accent: #0071e3;
     --accent-hover: #0077ed;
 
+    --brand-icon-start: #ff7258;
+    --brand-icon-end: #ff1738;
+    --brand-icon-background: #ffffff;
+    --brand-icon-control: #2d2430;
+    --brand-icon-control-highlight: #ffffff;
+    --brand-icon-platform-outline: #e21c35;
+    --brand-icon-platform-highlight: rgba(255, 255, 255, 0.24);
+
     --shadow-small:
         0 4px 20px rgba(0, 0, 0, 0.06);
 
@@ -60,6 +68,14 @@
 
     --shadow-large:
         0 20px 60px rgba(0, 0, 0, 0.45);
+
+    --brand-icon-start: #8d7bff;
+    --brand-icon-end: #3d63ff;
+    --brand-icon-background: #1c1c1e;
+    --brand-icon-control: #ffffff;
+    --brand-icon-control-highlight: rgba(255, 255, 255, 0.6);
+    --brand-icon-platform-outline: #7185ff;
+    --brand-icon-platform-highlight: rgba(255, 255, 255, 0.2);
 }
 
 
@@ -258,8 +274,8 @@ button {
 
 .brand-icon {
 
-    width: 42px;
-    height: 42px;
+    width: 56px;
+    height: 56px;
 
     display: flex;
 
@@ -267,10 +283,26 @@ button {
     justify-content: center;
 
     border-radius: 13px;
+}
 
-    background: var(--surface-solid);
+.brand-icon-svg {
 
-    box-shadow: var(--shadow-small);
+    width: 56px;
+    height: 56px;
+
+    display: block;
+}
+
+.brand-icon-gradient-start {
+    stop-color: var(--brand-icon-start);
+}
+
+.brand-icon-gradient-end {
+    stop-color: var(--brand-icon-end);
+}
+
+.brand-icon-background {
+    fill: var(--brand-icon-background);
 }
 
 
