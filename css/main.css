@@ -461,6 +461,11 @@ button {
     font-size: 13px;
 }
 
+.sort-menu-control {
+
+    position: relative;
+}
+
 .sort-select,
 .sort-direction-button {
 
@@ -481,7 +486,129 @@ button {
 
 .sort-select {
 
+    min-width: 140px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 18px;
+
+    text-align: left;
+
     cursor: pointer;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition);
+}
+
+.sort-select:hover,
+.sort-select[aria-expanded="true"] {
+
+    background: var(--surface-solid);
+}
+
+.sort-select-chevron {
+
+    width: 8px;
+    height: 8px;
+
+    flex: 0 0 auto;
+
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+
+    transform: translateY(-2px) rotate(45deg);
+
+    transition: transform var(--transition);
+}
+
+.sort-select[aria-expanded="true"] .sort-select-chevron {
+
+    transform: translateY(2px) rotate(225deg);
+}
+
+.sort-menu {
+
+    position: absolute;
+
+    top: calc(100% + 8px);
+    right: 0;
+
+    z-index: 20;
+
+    min-width: 100%;
+
+    padding: 5px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    background: var(--surface-solid);
+
+    box-shadow: var(--shadow-large);
+
+    animation: sort-menu-enter 140ms ease-out;
+}
+
+.sort-menu[hidden] {
+
+    display: none;
+}
+
+.sort-menu-option {
+
+    width: 100%;
+
+    display: block;
+
+    padding: 9px 11px;
+
+    border-radius: 9px;
+
+    background: transparent;
+
+    color: var(--text-primary);
+
+    font: inherit;
+
+    text-align: left;
+
+    white-space: nowrap;
+
+    transition:
+        background var(--transition),
+        color var(--transition);
+}
+
+.sort-menu-option:hover,
+.sort-menu-option:focus-visible {
+
+    outline: none;
+
+    background: var(--background);
+}
+
+.sort-menu-option[aria-checked="true"] {
+
+    color: var(--accent);
+}
+
+@keyframes sort-menu-enter {
+
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .sort-direction-button {

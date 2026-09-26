@@ -171,18 +171,65 @@
                     </span>
 
                     <div class="sort-controls">
-                        <label for="gameSortSelect">
+                        <span id="gameSortLabel">
                             排序
-                        </label>
+                        </span>
 
-                        <select
-                            id="gameSortSelect"
-                            class="sort-select"
-                        >
-                            <option value="recent">最近遊玩</option>
-                            <option value="name">名稱</option>
-                            <option value="category">類別</option>
-                        </select>
+                        <div class="sort-menu-control">
+                            <button
+                                id="gameSortButton"
+                                class="sort-select"
+                                type="button"
+                                aria-labelledby="gameSortLabel gameSortValue"
+                                aria-haspopup="menu"
+                                aria-expanded="false"
+                                aria-controls="gameSortMenu"
+                            >
+                                <span id="gameSortValue">
+                                    最近遊玩
+                                </span>
+                                <span
+                                    class="sort-select-chevron"
+                                    aria-hidden="true"
+                                ></span>
+                            </button>
+
+                            <div
+                                id="gameSortMenu"
+                                class="sort-menu"
+                                role="menu"
+                                aria-labelledby="gameSortLabel"
+                                hidden
+                            >
+                                <button
+                                    class="sort-menu-option"
+                                    type="button"
+                                    role="menuitemradio"
+                                    data-sort-mode="recent"
+                                    aria-checked="true"
+                                >
+                                    最近遊玩
+                                </button>
+                                <button
+                                    class="sort-menu-option"
+                                    type="button"
+                                    role="menuitemradio"
+                                    data-sort-mode="name"
+                                    aria-checked="false"
+                                >
+                                    名稱
+                                </button>
+                                <button
+                                    class="sort-menu-option"
+                                    type="button"
+                                    role="menuitemradio"
+                                    data-sort-mode="category"
+                                    aria-checked="false"
+                                >
+                                    類別
+                                </button>
+                            </div>
+                        </div>
 
                         <button
                             id="sortDirectionButton"
