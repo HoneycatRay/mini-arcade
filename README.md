@@ -25,6 +25,3 @@
 - 每款遊戲本機最高分與歷史紀錄
 - 無 CDN、無網路依賴
 - 遊戲程式獨立放在 `games/`，方便日後新增
-
-## 新增遊戲
-在 `games/` 新增 JavaScript，並在 `index.html` 用 `<script src="games/你的遊戲.js"></script>` 載入，再以 `MiniArcade.register({...})` 註冊即可。
