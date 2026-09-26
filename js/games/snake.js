@@ -77,9 +77,10 @@ window.MiniArcadeGames.snake = {
 
         canvas.className = "snake-canvas";
 
-        const gridSize = 20;
-        const tileCount = 25;
-        const canvasSize = gridSize * tileCount;
+        const tileCount = 22;
+        const canvasSize = 500;
+        const gridSize = canvasSize / tileCount;
+        const stepInterval = 200;
 
         canvas.width = canvasSize;
         canvas.height = canvasSize;
@@ -190,10 +191,10 @@ window.MiniArcadeGames.snake = {
             /* Grid */
 
             context.strokeStyle = dark
-                ? "rgba(255,255,255,0.035)"
-                : "rgba(0,0,0,0.035)";
+                ? "rgba(255,255,255,0.14)"
+                : "rgba(0,0,0,0.12)";
 
-            context.lineWidth = 1;
+            context.lineWidth = 2;
 
             for (let i = 0; i <= tileCount; i++) {
 
@@ -639,7 +640,7 @@ window.MiniArcadeGames.snake = {
 
             timer = setInterval(
                 update,
-                120
+                stepInterval
             );
         }
 
