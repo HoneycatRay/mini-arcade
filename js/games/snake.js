@@ -77,7 +77,7 @@ window.MiniArcadeGames.snake = {
 
         canvas.className = "snake-canvas";
 
-        const tileCount = 22;
+        const tileCount = 15;
         const canvasSize = 500;
         const gridSize = canvasSize / tileCount;
         const stepInterval = 200;

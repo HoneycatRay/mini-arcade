@@ -172,12 +172,7 @@
             </div>
         `;
 
-        const playButton =
-            card.querySelector(
-                ".game-play-button"
-            );
-
-        playButton.addEventListener(
+        card.addEventListener(
             "click",
             () => openGame(game)
         );
@@ -587,6 +582,25 @@
         closeGameButton.addEventListener(
             "click",
             closeGame
+        );
+
+        /* 點擊遊戲視窗外的背景 */
+
+        gameModal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target === gameModal ||
+                    event.target ===
+                        gameModal.querySelector(
+                            ".modal-backdrop"
+                        )
+                ) {
+
+                    closeGame();
+                }
+            }
         );
 
         /* 暫停 */
