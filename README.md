@@ -9,8 +9,8 @@
 直接以 `file://` 開啟時，瀏覽器對 `localStorage` 的支援可能不同，因此不保證主題與遊戲紀錄可持續保存。
 
 ## 第一版遊戲
-- 目前已實作：貪吃蛇、2048、踩地雷、俄羅斯方塊
-- 規劃中：Flappy Sky、Mini Racing、Sky Jumper、猜數字
+- 目前已實作：貪吃蛇、2048、踩地雷、俄羅斯方塊、Flappy Sky
+- 規劃中：Mini Racing、Sky Jumper、猜數字
 
 ## 特色
 - Apple-like 極簡介面
