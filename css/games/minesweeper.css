@@ -1,0 +1,233 @@
+/**
+ * Mini Arcade
+ * Minesweeper Game Styles
+ */
+
+.minesweeper-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: min(100%, 460px);
+    margin: auto;
+}
+
+.minesweeper-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+.minesweeper-flag-toggle {
+    min-height: 42px;
+    padding: 8px 14px;
+    font-size: 13px;
+}
+
+.minesweeper-flag-toggle[aria-pressed="true"] {
+    background: var(--accent);
+    color: #fff;
+}
+
+.minesweeper-flag-toggle:disabled {
+    cursor: default;
+    opacity: 0.65;
+}
+
+.minesweeper-mine-counter,
+.minesweeper-timer {
+    min-width: 92px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.minesweeper-timer {
+    min-width: 68px;
+}
+
+.minesweeper-board {
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    grid-template-rows: repeat(9, minmax(0, 1fr));
+    gap: clamp(2px, 0.8vw, 5px);
+    width: min(100%, 440px, calc(85vh - 220px));
+    width: min(100%, 440px, calc(85dvh - 220px));
+    aspect-ratio: 1;
+    padding: clamp(5px, 1.5vw, 9px);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow:
+        0 18px 42px rgba(0, 0, 0, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.minesweeper-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: clamp(3px, 0.8vw, 7px);
+    background: #dce2e9;
+    color: var(--text-primary);
+    font-size: clamp(12px, 3.2vw, 24px);
+    font-weight: 700;
+    line-height: 1;
+    transition:
+        background-color 120ms ease,
+        transform 120ms ease;
+}
+
+.minesweeper-cell:not(:disabled):hover {
+    z-index: 1;
+    transform: scale(1.06);
+    background: #cbd5e1;
+}
+
+.minesweeper-cell:focus-visible {
+    z-index: 2;
+    outline: 3px solid var(--accent);
+    outline-offset: 1px;
+}
+
+.minesweeper-cell.is-revealed {
+    border-color: rgba(0, 0, 0, 0.05);
+    background: #f1f3f5;
+}
+
+.minesweeper-cell.is-revealed[data-number="1"] {
+    color: #1971c2;
+}
+
+.minesweeper-cell.is-revealed[data-number="2"] {
+    color: #2b8a3e;
+}
+
+.minesweeper-cell.is-revealed[data-number="3"] {
+    color: #e03131;
+}
+
+.minesweeper-cell.is-revealed[data-number="4"] {
+    color: #5f3dc4;
+}
+
+.minesweeper-cell.is-revealed[data-number="5"] {
+    color: #c92a2a;
+}
+
+.minesweeper-cell.is-revealed[data-number="6"] {
+    color: #0b7285;
+}
+
+.minesweeper-cell.is-revealed[data-number="7"] {
+    color: #343a40;
+}
+
+.minesweeper-cell.is-revealed[data-number="8"] {
+    color: #868e96;
+}
+
+.minesweeper-cell.is-flagged {
+    background: #f5d98b;
+    color: #8a5a00;
+}
+
+.minesweeper-cell.is-mine {
+    background: #ffb8b8;
+    color: #b42318;
+}
+
+.minesweeper-cell.is-wrong-flag {
+    background: #ffd8a8;
+    color: #a04b00;
+}
+
+.minesweeper-status {
+    min-height: 1.5em;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+[data-theme="dark"] .minesweeper-cell {
+    border-color: rgba(255, 255, 255, 0.08);
+    background: #414148;
+}
+
+[data-theme="dark"] .minesweeper-cell:not(:disabled):hover {
+    background: #51515a;
+}
+
+[data-theme="dark"] .minesweeper-cell.is-revealed {
+    border-color: rgba(255, 255, 255, 0.04);
+    background: #29292e;
+}
+
+[data-theme="dark"] .minesweeper-cell.is-flagged {
+    background: #57451f;
+    color: #ffd666;
+}
+
+[data-theme="dark"] .minesweeper-cell.is-mine {
+    background: #602d31;
+    color: #ff8787;
+}
+
+[data-theme="dark"] .minesweeper-cell.is-wrong-flag {
+    background: #5a3c24;
+    color: #ffa94d;
+}
+
+@media (max-width: 600px) {
+    .minesweeper-game {
+        gap: 8px;
+    }
+
+    .minesweeper-toolbar {
+        gap: 6px;
+    }
+
+    .minesweeper-flag-toggle {
+        min-height: 38px;
+        padding: 7px 10px;
+    }
+
+    .minesweeper-mine-counter,
+    .minesweeper-timer {
+        padding: 7px 9px;
+        font-size: 12px;
+    }
+
+    .minesweeper-board {
+        width: min(100%, 440px, calc(80vh - 230px));
+        width: min(100%, 440px, calc(80dvh - 230px));
+        border-radius: 14px;
+    }
+}
+
+@media (max-height: 560px) {
+    .minesweeper-game {
+        gap: 6px;
+    }
+
+    .minesweeper-board {
+        width: min(100%, calc(70vh - 180px));
+        width: min(100%, calc(70dvh - 180px));
+    }
+}
