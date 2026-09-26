@@ -297,13 +297,51 @@ window.MiniArcadeGames.snake = {
 
             context.beginPath();
 
-            context.roundRect(
-                x,
-                y,
-                width,
-                height,
-                radius
-            );
+            if (typeof context.roundRect === "function") {
+                context.roundRect(
+                    x,
+                    y,
+                    width,
+                    height,
+                    radius
+                );
+            } else {
+                const cornerRadius = Math.min(
+                    radius,
+                    width / 2,
+                    height / 2
+                );
+
+                context.moveTo(x + cornerRadius, y);
+                context.lineTo(x + width - cornerRadius, y);
+                context.quadraticCurveTo(
+                    x + width,
+                    y,
+                    x + width,
+                    y + cornerRadius
+                );
+                context.lineTo(x + width, y + height - cornerRadius);
+                context.quadraticCurveTo(
+                    x + width,
+                    y + height,
+                    x + width - cornerRadius,
+                    y + height
+                );
+                context.lineTo(x + cornerRadius, y + height);
+                context.quadraticCurveTo(
+                    x,
+                    y + height,
+                    x,
+                    y + height - cornerRadius
+                );
+                context.lineTo(x, y + cornerRadius);
+                context.quadraticCurveTo(
+                    x,
+                    y,
+                    x + cornerRadius,
+                    y
+                );
+            }
 
             context.fill();
         }
@@ -376,7 +414,7 @@ window.MiniArcadeGames.snake = {
             );
         }
 
-        function hasCollision(head) {
+        function hasCollision(head, isEating) {
 
             /* 撞牆 */
 
@@ -391,7 +429,11 @@ window.MiniArcadeGames.snake = {
 
             /* 撞到自己 */
 
-            return snake.some(segment =>
+            const segmentsToCheck = isEating
+                ? snake
+                : snake.slice(0, -1);
+
+            return segmentsToCheck.some(segment =>
                 isSamePosition(head, segment)
             );
         }
@@ -421,7 +463,9 @@ window.MiniArcadeGames.snake = {
 
             /* Collision */
 
-            if (hasCollision(head)) {
+            const isEating = isSamePosition(head, food);
+
+            if (hasCollision(head, isEating)) {
 
                 endGame();
 
@@ -432,7 +476,7 @@ window.MiniArcadeGames.snake = {
 
             /* Eat Food */
 
-            if (isSamePosition(head, food)) {
+            if (isEating) {
 
                 score += 10;
 
@@ -656,6 +700,7 @@ window.MiniArcadeGames.snake = {
 
         return {
             togglePause,
+            refresh: draw,
             destroy
         };
     }

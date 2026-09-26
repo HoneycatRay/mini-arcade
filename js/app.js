@@ -23,9 +23,9 @@
        Game Registry
        ========================================= */
 
-    const games = [
-        window.MiniArcadeGames.snake
-    ];
+    const games = Object.values(
+        window.MiniArcadeGames || {}
+    );
 
     /* =========================================
        DOM
@@ -384,7 +384,7 @@
     function initializeTheme() {
 
         const savedTheme =
-            localStorage.getItem(
+            MiniArcadeStorage.getSetting(
                 "miniArcade_theme"
             );
 
@@ -415,7 +415,7 @@
         document.documentElement.dataset.theme =
             theme;
 
-        localStorage.setItem(
+        MiniArcadeStorage.setSetting(
             "miniArcade_theme",
             theme
         );
@@ -461,19 +461,51 @@
        Fullscreen
        ========================================= */
 
+    function getFullscreenElement() {
+        return (
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            null
+        );
+    }
+
     async function toggleFullscreen(
         element = document.documentElement
     ) {
 
         try {
 
-            if (!document.fullscreenElement) {
+            if (getFullscreenElement() === element) {
 
-                await element.requestFullscreen();
+                const exitFullscreen =
+                    document.exitFullscreen ||
+                    document.webkitExitFullscreen;
+
+                if (typeof exitFullscreen !== "function") {
+                    console.warn(
+                        "Mini Arcade：此瀏覽器不支援退出全螢幕。"
+                    );
+
+                    return;
+                }
+
+                await exitFullscreen.call(document);
 
             } else {
 
-                await document.exitFullscreen();
+                const requestFullscreen =
+                    element.requestFullscreen ||
+                    element.webkitRequestFullscreen;
+
+                if (typeof requestFullscreen !== "function") {
+                    console.warn(
+                        "Mini Arcade：此瀏覽器不支援全螢幕。"
+                    );
+
+                    return;
+                }
+
+                await requestFullscreen.call(element);
             }
 
         } catch (error) {
@@ -485,13 +517,31 @@
         }
     }
 
-    function exitFullscreenIfNeeded() {
+    async function exitFullscreenIfNeeded() {
 
-        if (document.fullscreenElement) {
+        while (getFullscreenElement()) {
 
-            document
-                .exitFullscreen()
-                .catch(() => {});
+            const exitFullscreen =
+                document.exitFullscreen ||
+                document.webkitExitFullscreen;
+
+            if (typeof exitFullscreen !== "function") {
+                console.warn(
+                    "Mini Arcade：此瀏覽器不支援退出全螢幕。"
+                );
+
+                return;
+            }
+
+            try {
+                await exitFullscreen.call(document);
+            } catch (error) {
+                console.warn(
+                    "Mini Arcade：無法退出全螢幕。",
+                    error
+                );
+                return;
+            }
         }
     }
 

@@ -3,17 +3,14 @@
 一個可在 Windows / macOS 上直接以瀏覽器開啟的離線小遊戲平台。
 
 ## 啟動
-直接雙擊 `index.html`。不需要網路、Node.js、npm 或任何外部套件。
+使用本機 HTTP Server 提供專案檔案，例如 `http://localhost:8000`。
+不需要網路、Node.js、npm 或任何外部套件。
+
+直接以 `file://` 開啟時，瀏覽器對 `localStorage` 的支援可能不同，因此不保證主題與遊戲紀錄可持續保存。
 
 ## 第一版遊戲
-- 貪吃蛇
-- 2048
-- 俄羅斯方塊
-- 踩地雷
-- Flappy Sky
-- Mini Racing
-- Sky Jumper
-- 猜數字
+- 目前已實作：貪吃蛇
+- 規劃中：2048、俄羅斯方塊、踩地雷、Flappy Sky、Mini Racing、Sky Jumper、猜數字
 
 ## 特色
 - Apple-like 極簡介面
