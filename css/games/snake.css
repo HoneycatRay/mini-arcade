@@ -22,8 +22,15 @@
 .snake-canvas {
     display: block;
 
-    width: min(500px, 100%);
+    width: min(500px, 100%, calc(95vh - 220px));
+
+    width: min(500px, 100%, calc(95dvh - 220px));
+
     height: auto;
+
+    max-height: calc(95vh - 220px);
+
+    max-height: calc(95dvh - 220px);
 
     aspect-ratio: 1 / 1;
 
@@ -59,5 +66,13 @@
 
     .snake-canvas {
         border-radius: 18px;
+
+        width: min(500px, 100%, calc(95vh - 190px));
+
+        width: min(500px, 100%, calc(95dvh - 190px));
+
+        max-height: calc(95vh - 190px);
+
+        max-height: calc(95dvh - 190px);
     }
 }
