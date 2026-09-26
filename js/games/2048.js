@@ -291,8 +291,11 @@ window.MiniArcadeGames.game2048 = {
             }
 
             if (!hasMoved) {
+                api.reportInvalidAction?.();
                 return;
             }
+
+            api.reportValidAction?.();
 
             score += scoreIncrease;
 
@@ -346,7 +349,8 @@ window.MiniArcadeGames.game2048 = {
 
         function finishGame() {
             gameOver = true;
-            statusElement.textContent = `遊戲結束，最終分數 ${score}`;
+            statusElement.textContent =
+                `遊戲結束，最終分數 ${score}。按 WASD 重新開始。`;
             api.recordScore(score);
         }
 

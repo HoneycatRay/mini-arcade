@@ -22,7 +22,8 @@ window.MiniArcadeGames.minesweeper = {
 
         <p>
             找出棋盤上所有安全格，不必標記每一顆地雷也能獲勝。
-            棋盤為 9 × 9，共有 10 顆地雷；第一次翻開的格子保證安全。
+            簡單為 9 × 9／10 顆地雷，普通為 16 × 16／40 顆，
+            困難為 30 × 16／99 顆。第一次翻開的格子保證安全。
         </p>
 
         <p><strong>操作方式</strong></p>
@@ -41,15 +42,34 @@ window.MiniArcadeGames.minesweeper = {
     `,
 
     launch(container, api) {
-        const boardSize = 9;
-        const mineCount = 10;
-        const cellCount = boardSize * boardSize;
+        const difficultySetting =
+            "miniArcade_minesweeper_difficulty";
+        const difficulties = {
+            easy: { label: "簡單", rows: 9, columns: 9, mines: 10 },
+            normal: { label: "普通", rows: 16, columns: 16, mines: 40 },
+            hard: { label: "困難", rows: 30, columns: 16, mines: 99 }
+        };
+        const savedDifficulty =
+            window.MiniArcadeStorage.getSetting(difficultySetting);
+        let difficulty =
+            Object.prototype.hasOwnProperty.call(
+                difficulties,
+                savedDifficulty
+            )
+                ? savedDifficulty
+                : "easy";
+        let boardRows = difficulties[difficulty].rows;
+        let boardColumns = difficulties[difficulty].columns;
+        let mineCount = difficulties[difficulty].mines;
+        let cellCount = boardRows * boardColumns;
         const winBonusBase = 1000;
         const winBonusPerSecond = 5;
         const minimumWinBonus = 100;
 
         const wrapper = document.createElement("section");
         const toolbar = document.createElement("div");
+        const difficultyLabel = document.createElement("label");
+        const difficultySelect = document.createElement("select");
         const flagButton = document.createElement("button");
         const mineCounter = document.createElement("span");
         const timerDisplay = document.createElement("span");
@@ -59,6 +79,23 @@ window.MiniArcadeGames.minesweeper = {
 
         wrapper.className = "minesweeper-game";
         toolbar.className = "minesweeper-toolbar";
+
+        difficultyLabel.className = "minesweeper-difficulty-label";
+        difficultyLabel.textContent = "難度";
+        difficultyLabel.htmlFor = "minesweeperDifficulty";
+
+        difficultySelect.className = "minesweeper-difficulty-select";
+        difficultySelect.id = "minesweeperDifficulty";
+        difficultySelect.setAttribute("aria-label", "踩地雷難度");
+
+        Object.entries(difficulties).forEach(([value, option]) => {
+            const element = document.createElement("option");
+
+            element.value = value;
+            element.textContent = option.label;
+            difficultySelect.appendChild(element);
+        });
+        difficultySelect.value = difficulty;
 
         flagButton.className = "secondary-button minesweeper-flag-toggle";
         flagButton.type = "button";
@@ -73,24 +110,14 @@ window.MiniArcadeGames.minesweeper = {
 
         boardElement.className = "minesweeper-board";
         boardElement.setAttribute("role", "grid");
-        boardElement.setAttribute("aria-label", "踩地雷 9 乘 9 棋盤");
+        boardElement.setAttribute("aria-label", "踩地雷遊戲棋盤");
 
         statusElement.className = "minesweeper-status";
         statusElement.setAttribute("aria-live", "polite");
         statusElement.textContent = "翻開安全格，並留意周圍的數字。";
 
-        for (let index = 0; index < cellCount; index++) {
-            const cell = document.createElement("button");
-
-            cell.className = "minesweeper-cell";
-            cell.type = "button";
-            cell.dataset.index = String(index);
-            cell.tabIndex = index === 0 ? 0 : -1;
-            cell.setAttribute("role", "gridcell");
-            cells.push(cell);
-            boardElement.appendChild(cell);
-        }
-
+        toolbar.appendChild(difficultyLabel);
+        toolbar.appendChild(difficultySelect);
         toolbar.appendChild(flagButton);
         toolbar.appendChild(mineCounter);
         toolbar.appendChild(timerDisplay);
@@ -113,6 +140,32 @@ window.MiniArcadeGames.minesweeper = {
         let pausedAt = null;
         let pausedDuration = 0;
 
+        function createCells() {
+            cells.length = 0;
+            boardElement.replaceChildren();
+            boardElement.style.setProperty(
+                "--minesweeper-columns",
+                String(boardColumns)
+            );
+            boardElement.style.setProperty(
+                "--minesweeper-rows",
+                String(boardRows)
+            );
+            boardElement.dataset.difficulty = difficulty;
+
+            for (let index = 0; index < cellCount; index++) {
+                const cell = document.createElement("button");
+
+                cell.className = "minesweeper-cell";
+                cell.type = "button";
+                cell.dataset.index = String(index);
+                cell.tabIndex = index === 0 ? 0 : -1;
+                cell.setAttribute("role", "gridcell");
+                cells.push(cell);
+                boardElement.appendChild(cell);
+            }
+        }
+
         function createBoard() {
             return Array.from(
                 { length: cellCount },
@@ -126,8 +179,8 @@ window.MiniArcadeGames.minesweeper = {
         }
 
         function getNeighbors(index) {
-            const row = Math.floor(index / boardSize);
-            const column = index % boardSize;
+            const row = Math.floor(index / boardColumns);
+            const column = index % boardColumns;
             const neighbors = [];
 
             for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
@@ -145,12 +198,12 @@ window.MiniArcadeGames.minesweeper = {
 
                     if (
                         neighborRow >= 0 &&
-                        neighborRow < boardSize &&
+                        neighborRow < boardRows &&
                         neighborColumn >= 0 &&
-                        neighborColumn < boardSize
+                        neighborColumn < boardColumns
                     ) {
                         neighbors.push(
-                            neighborRow * boardSize + neighborColumn
+                            neighborRow * boardColumns + neighborColumn
                         );
                     }
                 }
@@ -247,8 +300,8 @@ window.MiniArcadeGames.minesweeper = {
         function renderCell(index) {
             const cell = board[index];
             const element = cells[index];
-            const row = Math.floor(index / boardSize) + 1;
-            const column = (index % boardSize) + 1;
+            const row = Math.floor(index / boardColumns) + 1;
+            const column = (index % boardColumns) + 1;
 
             element.className = "minesweeper-cell";
             element.textContent = "";
@@ -301,6 +354,10 @@ window.MiniArcadeGames.minesweeper = {
 
             mineCounter.textContent =
                 `剩餘地雷 ${mineCount - flaggedCount}`;
+            boardElement.setAttribute(
+                "aria-label",
+                `踩地雷 ${boardRows} 乘 ${boardColumns} 棋盤，${difficulties[difficulty].label}難度`
+            );
 
             flagButton.textContent = flagMode
                 ? "標記地雷：開"
@@ -324,15 +381,22 @@ window.MiniArcadeGames.minesweeper = {
 
             if (
                 paused ||
-                gameOver ||
+                gameOver
+            ) {
+                return;
+            }
+
+            if (
                 cell.isRevealed ||
                 (!cell.isFlagged && flaggedCount >= mineCount)
             ) {
+                api.reportInvalidAction?.();
                 return;
             }
 
             cell.isFlagged = !cell.isFlagged;
             flaggedCount += cell.isFlagged ? 1 : -1;
+            api.reportValidAction?.();
             render();
         }
 
@@ -341,12 +405,17 @@ window.MiniArcadeGames.minesweeper = {
 
             if (
                 paused ||
-                gameOver ||
-                cell.isRevealed ||
-                cell.isFlagged
+                gameOver
             ) {
                 return;
             }
+
+            if (cell.isRevealed || cell.isFlagged) {
+                api.reportInvalidAction?.();
+                return;
+            }
+
+            api.reportValidAction?.();
 
             if (!isBoardGenerated) {
                 generateBoard(index);
@@ -424,10 +493,10 @@ window.MiniArcadeGames.minesweeper = {
 
                 finalScore += timeBonus;
                 statusElement.textContent =
-                    `全部安全格都找到了！用時 ${formatTime(getElapsedSeconds())}，獎勵 ${timeBonus} 分。`;
+                    `全部安全格都找到了！用時 ${formatTime(getElapsedSeconds())}，獎勵 ${timeBonus} 分。按 R 重新開始。`;
             } else {
                 statusElement.textContent =
-                    `踩到地雷了。本局翻開 ${revealedSafeCount} 格安全格。`;
+                    `踩到地雷了。本局翻開 ${revealedSafeCount} 格安全格。按 R 重新開始。`;
             }
 
             api.updateScore(finalScore);
@@ -514,9 +583,9 @@ window.MiniArcadeGames.minesweeper = {
             let nextIndex = index;
 
             if (event.key === "ArrowUp") {
-                nextIndex -= boardSize;
+                nextIndex -= boardColumns;
             } else if (event.key === "ArrowDown") {
-                nextIndex += boardSize;
+                nextIndex += boardColumns;
             } else if (event.key === "ArrowLeft") {
                 nextIndex--;
             } else if (event.key === "ArrowRight") {
@@ -531,15 +600,52 @@ window.MiniArcadeGames.minesweeper = {
                 nextIndex < 0 ||
                 nextIndex >= cellCount ||
                 Math.abs(
-                    (nextIndex % boardSize) - (index % boardSize)
+                    (nextIndex % boardColumns) -
+                        (index % boardColumns)
                 ) > 1
             ) {
+                api.reportInvalidAction?.();
                 return;
             }
 
             activeCellIndex = nextIndex;
+            api.reportValidAction?.();
             render();
             cells[activeCellIndex].focus();
+        }
+
+        function resetForDifficulty() {
+            stopTimer();
+            boardRows = difficulties[difficulty].rows;
+            boardColumns = difficulties[difficulty].columns;
+            mineCount = difficulties[difficulty].mines;
+            cellCount = boardRows * boardColumns;
+            board = createBoard();
+            isBoardGenerated = false;
+            flagMode = false;
+            paused = false;
+            gameOver = false;
+            flaggedCount = 0;
+            revealedSafeCount = 0;
+            activeCellIndex = 0;
+            startedAt = null;
+            pausedAt = null;
+            pausedDuration = 0;
+            statusElement.textContent =
+                `${difficulties[difficulty].label}難度：新棋盤已開始。翻開安全格，並留意周圍的數字。`;
+            createCells();
+            render();
+            updateTimerDisplay();
+            api.updateScore(0);
+        }
+
+        function handleDifficultyChange() {
+            difficulty = difficultySelect.value;
+            window.MiniArcadeStorage.setSetting(
+                difficultySetting,
+                difficulty
+            );
+            resetForDifficulty();
         }
 
         function destroy() {
@@ -552,6 +658,10 @@ window.MiniArcadeGames.minesweeper = {
             flagButton.removeEventListener(
                 "click",
                 handleFlagButtonClick
+            );
+            difficultySelect.removeEventListener(
+                "change",
+                handleDifficultyChange
             );
             boardElement.removeEventListener(
                 "click",
@@ -571,6 +681,10 @@ window.MiniArcadeGames.minesweeper = {
             "click",
             handleFlagButtonClick
         );
+        difficultySelect.addEventListener(
+            "change",
+            handleDifficultyChange
+        );
         boardElement.addEventListener(
             "click",
             handleBoardClick
@@ -584,6 +698,7 @@ window.MiniArcadeGames.minesweeper = {
             handleBoardKeyDown
         );
 
+        createCells();
         render();
         updateTimerDisplay();
         api.updateScore(0);
