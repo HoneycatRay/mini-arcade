@@ -1,0 +1,128 @@
+/**
+ * Mini Arcade
+ * Drive Ahead! Game Styles
+ */
+
+.drive-ahead-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: min(100%, 900px);
+    margin: auto;
+}
+
+.drive-ahead-hud {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.drive-ahead-rounds {
+    padding: 7px 15px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.drive-ahead-canvas {
+    display: block;
+    width: min(100%, 820px, calc((92vh - 235px) * 1.64));
+    width: min(100%, 820px, calc((92dvh - 235px) * 1.64));
+    height: auto;
+    aspect-ratio: 820 / 500;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background: #d9ebea;
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+    touch-action: none;
+    user-select: none;
+}
+
+.drive-ahead-canvas:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.drive-ahead-status {
+    min-height: 1.5em;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.drive-ahead-controls {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .drive-ahead-game {
+        gap: 7px;
+    }
+
+    .drive-ahead-canvas {
+        width: min(100%, calc((86vh - 215px) * 1.64));
+        width: min(100%, calc((86dvh - 215px) * 1.64));
+        border-radius: 15px;
+    }
+
+    .drive-ahead-controls {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(72px, 1fr));
+        gap: 8px;
+        width: min(100%, 380px);
+    }
+
+    .drive-ahead-control {
+        min-height: 46px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--surface);
+        color: var(--text-primary);
+        font-size: 20px;
+        font-weight: 700;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .drive-ahead-control.is-pressed,
+    .drive-ahead-control:active {
+        background: var(--surface-solid);
+        transform: scale(0.97);
+    }
+
+    .drive-ahead-jump {
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .drive-ahead-jump.is-pressed,
+    .drive-ahead-jump:active {
+        background: var(--accent-hover);
+    }
+}
+
+@media (max-height: 560px) {
+    .drive-ahead-game {
+        gap: 5px;
+    }
+
+    .drive-ahead-canvas {
+        width: min(100%, calc((82vh - 185px) * 1.64));
+        width: min(100%, calc((82dvh - 185px) * 1.64));
+    }
+
+    .drive-ahead-control {
+        min-height: 38px;
+    }
+}

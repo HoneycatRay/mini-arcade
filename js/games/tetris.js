@@ -22,7 +22,7 @@ window.MiniArcadeGames.tetris = {
 
         <p>
             移動、旋轉落下的方塊，填滿整個橫列即可消除並得分。
-            方塊堆到棋盤頂端時遊戲結束。
+            方塊堆到棋盤頂端時遊戲結束。切換難度會重新開始本局。
         </p>
 
         <p><strong>鍵盤操作</strong></p>
@@ -34,12 +34,14 @@ window.MiniArcadeGames.tetris = {
             <li>E：順時針旋轉</li>
             <li>空白鍵：直接落到底</li>
             <li>P：暫停 / 繼續</li>
+            <li>方向移動可使用 WASD 或方向鍵，旋轉與其他快捷鍵可在設定面板自訂</li>
         </ul>
 
         <p>
             手機或平板可使用棋盤下方的操作按鈕。
             每次消除一至四列分別得 100、300、500、800 分，
-            分數會隨等級提升。
+            分數會隨等級提升。簡單、普通、困難會調整方塊下落速度；
+            切換難度會重新開始本局。
         </p>
     `,
 
@@ -49,8 +51,168 @@ window.MiniArcadeGames.tetris = {
         const cellSize = 30;
         const boardWidth = columns * cellSize;
         const boardHeight = rows * cellSize;
-        const gravityBaseDelay = 900;
-        const minimumGravityDelay = 100;
+        const difficultySetting =
+            "miniArcade_tetris_difficulty";
+        const difficulties = {
+            easy: {
+                label: "簡單",
+                gravityBaseDelay: 1200,
+                gravityLevelMultiplier: 0.84,
+                minimumGravityDelay: 180
+            },
+            normal: {
+                label: "普通",
+                gravityBaseDelay: 900,
+                gravityLevelMultiplier: 0.82,
+                minimumGravityDelay: 100
+            },
+            hard: {
+                label: "困難",
+                gravityBaseDelay: 600,
+                gravityLevelMultiplier: 0.78,
+                minimumGravityDelay: 60
+            }
+        };
+        const savedDifficulty =
+            window.MiniArcadeStorage.getSetting(difficultySetting);
+        let difficulty =
+            Object.prototype.hasOwnProperty.call(
+                difficulties,
+                savedDifficulty
+            )
+                ? savedDifficulty
+                : "normal";
+        const keyBindingsSetting = "miniArcade_tetris_keyBindings";
+        const defaultKeyBindings = {
+            moveLeft: ["a", "arrowleft"],
+            moveRight: ["d", "arrowright"],
+            softDrop: ["s", "arrowdown"],
+            rotateCounterclockwise: ["q"],
+            rotateClockwise: ["e", "w", "arrowup"],
+            hardDrop: [" "],
+            pause: ["p"]
+        };
+        const keyBindingActions = [
+            { id: "moveLeft", label: "向左移動" },
+            { id: "moveRight", label: "向右移動" },
+            { id: "softDrop", label: "加速下落" },
+            { id: "rotateCounterclockwise", label: "逆時針旋轉" },
+            { id: "rotateClockwise", label: "順時針旋轉" },
+            { id: "hardDrop", label: "直接落到底" },
+            { id: "pause", label: "暫停 / 繼續" }
+        ];
+
+        function normalizeBindingKey(key) {
+            return key.toLowerCase();
+        }
+
+        function copyDefaultKeyBindings() {
+            return Object.fromEntries(
+                Object.entries(defaultKeyBindings).map(
+                    ([id, keys]) => [id, [...keys]]
+                )
+            );
+        }
+
+        function loadKeyBindings() {
+            const savedBindings = window.MiniArcadeStorage.getSetting(
+                keyBindingsSetting
+            );
+
+            if (!savedBindings) {
+                return copyDefaultKeyBindings();
+            }
+
+            try {
+                const parsedBindings = JSON.parse(savedBindings);
+                const bindings = copyDefaultKeyBindings();
+
+                if (
+                    !parsedBindings ||
+                    typeof parsedBindings !== "object" ||
+                    Array.isArray(parsedBindings)
+                ) {
+                    throw new TypeError("快捷鍵設定格式無效。");
+                }
+
+                keyBindingActions.forEach(({ id }) => {
+                    const savedKeys = parsedBindings[id];
+
+                    if (typeof savedKeys === "string") {
+                        const normalizedKey =
+                            normalizeBindingKey(savedKeys);
+                        const previousDefault =
+                            id === "moveLeft"
+                                ? "arrowleft"
+                                : id === "moveRight"
+                                    ? "arrowright"
+                                    : id === "softDrop"
+                                        ? "arrowdown"
+                                        : id === "rotateClockwise"
+                                            ? "e"
+                                            : null;
+
+                        bindings[id] =
+                            normalizedKey === previousDefault
+                                ? [...defaultKeyBindings[id]]
+                                : [normalizedKey];
+                    } else if (Array.isArray(savedKeys)) {
+                        bindings[id] = savedKeys.map(key =>
+                            typeof key === "string"
+                                ? normalizeBindingKey(key)
+                                : key
+                        );
+                    }
+                });
+
+                const values = keyBindingActions.flatMap(
+                    ({ id }) => bindings[id]
+                );
+
+                if (
+                    keyBindingActions.every(({ id }) =>
+                        Array.isArray(bindings[id]) &&
+                        bindings[id].length > 0 &&
+                        bindings[id].every(value => typeof value === "string")
+                    ) &&
+                    values.every(value =>
+                        typeof value === "string" &&
+                        (
+                            value === " " ||
+                            value === "arrowleft" ||
+                            value === "arrowright" ||
+                            value === "arrowup" ||
+                            value === "arrowdown" ||
+                            /^[a-z0-9]$/i.test(value)
+                        )
+                    ) &&
+                    values.every(value => normalizeBindingKey(value) !== "r") &&
+                    keyBindingActions.every(({ id }, index, actions) =>
+                        actions.slice(index + 1).every(({ id: otherId }) =>
+                            !bindings[id].some(key =>
+                                bindings[otherId].includes(key)
+                            )
+                        )
+                    ) &&
+                    keyBindingActions.every(({ id }) =>
+                        new Set(bindings[id]).size === bindings[id].length
+                    )
+                ) {
+                    return bindings;
+                }
+            } catch (error) {
+                console.warn(
+                    "Mini Arcade：無法讀取俄羅斯方塊快捷鍵設定，改用預設按鍵。",
+                    error
+                );
+                return copyDefaultKeyBindings();
+            }
+
+            console.warn(
+                "Mini Arcade：俄羅斯方塊快捷鍵設定無效，改用預設按鍵。"
+            );
+            return copyDefaultKeyBindings();
+        }
 
         const pieceShapes = {
             I: [
@@ -98,8 +260,12 @@ window.MiniArcadeGames.tetris = {
         const sidebar = document.createElement("aside");
         const nextTitle = document.createElement("h3");
         const nextCanvas = document.createElement("canvas");
+        const difficultyLabel = document.createElement("label");
+        const difficultySelect = document.createElement("select");
         const linesDisplay = document.createElement("p");
         const levelDisplay = document.createElement("p");
+        const keyBindingsToggle = document.createElement("button");
+        const keyBindingsPanel = document.createElement("div");
         const statusElement = document.createElement("p");
         const controls = document.createElement("div");
         const controlButtons = [];
@@ -124,9 +290,38 @@ window.MiniArcadeGames.tetris = {
         nextTitle.className = "tetris-next-title";
         nextTitle.textContent = "下一個";
 
+        difficultyLabel.className = "tetris-difficulty-label";
+        difficultyLabel.textContent = "難度";
+        difficultyLabel.htmlFor = "tetrisDifficulty";
+
+        difficultySelect.className = "tetris-difficulty-select";
+        difficultySelect.id = "tetrisDifficulty";
+        difficultySelect.setAttribute("aria-label", "俄羅斯方塊難度");
+        Object.entries(difficulties).forEach(([value, option]) => {
+            const element = document.createElement("option");
+
+            element.value = value;
+            element.textContent = option.label;
+            difficultySelect.appendChild(element);
+        });
+        difficultySelect.value = difficulty;
+
         sidebar.className = "tetris-sidebar";
         linesDisplay.className = "tetris-stat";
         levelDisplay.className = "tetris-stat";
+
+        keyBindingsToggle.className =
+            "tetris-keybindings-toggle";
+        keyBindingsToggle.type = "button";
+        keyBindingsToggle.textContent = "快捷鍵設定";
+        keyBindingsToggle.setAttribute("aria-expanded", "false");
+
+        keyBindingsPanel.className = "tetris-keybindings";
+        keyBindingsPanel.hidden = true;
+        keyBindingsPanel.setAttribute(
+            "aria-label",
+            "俄羅斯方塊快捷鍵設定"
+        );
 
         statusElement.className = "tetris-status";
         statusElement.setAttribute("aria-live", "polite");
@@ -160,6 +355,221 @@ window.MiniArcadeGames.tetris = {
         let paused = false;
         let gameOver = false;
         let destroyed = false;
+        let activeBindingAction = null;
+        const keyBindings = loadKeyBindings();
+        const keyBindingRows = new Map();
+
+        function getKeyLabel(key) {
+            const labels = {
+                arrowleft: "←",
+                arrowright: "→",
+                arrowup: "↑",
+                arrowdown: "↓",
+                " ": "Space"
+            };
+
+            return labels[normalizeBindingKey(key)] || key.toUpperCase();
+        }
+
+        function renderKeyBindings() {
+            keyBindingActions.forEach(({ id }) => {
+                const row = keyBindingRows.get(id);
+
+                if (!row) {
+                    return;
+                }
+
+                row.keysElement.replaceChildren();
+                keyBindings[id].forEach(key => {
+                    const keyButton = document.createElement("button");
+
+                    keyButton.className = "tetris-key-binding";
+                    keyButton.type = "button";
+                    keyButton.textContent = getKeyLabel(key);
+                    keyButton.setAttribute(
+                        "aria-label",
+                        `${row.label}快捷鍵 ${getKeyLabel(key)}，按此移除`
+                    );
+                    keyButton.addEventListener("click", () => {
+                        if (keyBindings[id].length === 1) {
+                            statusElement.textContent =
+                                "每項操作至少需要保留一個快捷鍵。";
+                            return;
+                        }
+
+                        keyBindings[id] = keyBindings[id].filter(
+                            assignedKey => assignedKey !== key
+                        );
+                        saveKeyBindings("快捷鍵已更新。");
+                    });
+                    row.keysElement.appendChild(keyButton);
+                });
+
+                row.addButton.textContent =
+                    activeBindingAction === id ? "按下按鍵…" : "＋";
+                row.addButton.classList.toggle(
+                    "is-listening",
+                    activeBindingAction === id
+                );
+            });
+
+            wrapper.classList.toggle(
+                "is-capturing-key",
+                activeBindingAction !== null
+            );
+        }
+
+        function saveKeyBindings(successMessage) {
+            const persisted = window.MiniArcadeStorage.setSetting(
+                keyBindingsSetting,
+                JSON.stringify(keyBindings)
+            );
+
+            activeBindingAction = null;
+            statusElement.textContent = persisted
+                ? successMessage
+                : `${successMessage}但無法寫入瀏覽器儲存空間，設定只套用於本次工作階段。`;
+            renderKeyBindings();
+        }
+
+        function beginKeyBinding(actionId) {
+            activeBindingAction = actionId;
+            statusElement.textContent =
+                "請按下要新增的快捷鍵；Escape 取消，R 保留為重新開始。";
+            renderKeyBindings();
+        }
+
+        function handleKeyBindingCapture(event) {
+            if (activeBindingAction === null) {
+                return false;
+            }
+
+            event.preventDefault();
+
+            if (event.key === "Escape") {
+                activeBindingAction = null;
+                statusElement.textContent =
+                    "排列方塊，填滿橫列以消除。";
+                renderKeyBindings();
+                return true;
+            }
+
+            if (
+                event.repeat ||
+                event.ctrlKey ||
+                event.altKey ||
+                event.metaKey
+            ) {
+                return true;
+            }
+
+            const key = normalizeBindingKey(event.key);
+            const isSupportedKey =
+                key === " " ||
+                key === "arrowleft" ||
+                key === "arrowright" ||
+                key === "arrowup" ||
+                key === "arrowdown" ||
+                /^[a-z0-9]$/i.test(key);
+
+            if (!isSupportedKey) {
+                statusElement.textContent =
+                    "請使用英文字母、數字、方向鍵或空白鍵。";
+                return true;
+            }
+
+            if (key === "r") {
+                statusElement.textContent =
+                    "R 保留為所有遊戲的重新開始快捷鍵。";
+                return true;
+            }
+
+            const conflictingAction = keyBindingActions.find(({ id }) =>
+                id !== activeBindingAction &&
+                keyBindings[id].includes(key)
+            );
+
+            if (conflictingAction) {
+                statusElement.textContent =
+                    `此按鍵已用於「${conflictingAction.label}」，請選擇其他按鍵。`;
+                return true;
+            }
+
+            if (keyBindings[activeBindingAction].includes(key)) {
+                statusElement.textContent =
+                    "此操作已包含該快捷鍵。";
+                return true;
+            }
+
+            keyBindings[activeBindingAction].push(key);
+            saveKeyBindings("快捷鍵已新增並儲存。");
+            return true;
+        }
+
+        keyBindingActions.forEach(({ id, label }) => {
+            const row = document.createElement("div");
+            const actionLabel = document.createElement("span");
+            const keysElement = document.createElement("div");
+            const addButton = document.createElement("button");
+
+            row.className = "tetris-keybinding-row";
+            actionLabel.textContent = label;
+            keysElement.className = "tetris-keybinding-keys";
+            addButton.className = "tetris-key-binding tetris-key-binding-add";
+            addButton.type = "button";
+            addButton.setAttribute("aria-label", `新增${label}快捷鍵`);
+
+            const handleClick = () => {
+                beginKeyBinding(id);
+            };
+
+            addButton.addEventListener("click", handleClick);
+            keyBindingRows.set(id, {
+                label,
+                keysElement,
+                addButton,
+                handleClick
+            });
+            row.appendChild(actionLabel);
+            row.appendChild(keysElement);
+            row.appendChild(addButton);
+            keyBindingsPanel.appendChild(row);
+        });
+
+        const restoreDefaultsButton = document.createElement("button");
+        restoreDefaultsButton.className =
+            "tetris-keybindings-restore";
+        restoreDefaultsButton.type = "button";
+        restoreDefaultsButton.textContent = "恢復預設值";
+
+        function restoreDefaultKeyBindings() {
+            Object.keys(defaultKeyBindings).forEach(id => {
+                keyBindings[id] = [...defaultKeyBindings[id]];
+            });
+            activeBindingAction = null;
+            saveKeyBindings("已恢復預設快捷鍵。");
+        }
+
+        restoreDefaultsButton.addEventListener(
+            "click",
+            restoreDefaultKeyBindings
+        );
+        keyBindingsPanel.appendChild(restoreDefaultsButton);
+
+        renderKeyBindings();
+
+        function toggleKeyBindings() {
+            keyBindingsPanel.hidden = !keyBindingsPanel.hidden;
+            keyBindingsToggle.setAttribute(
+                "aria-expanded",
+                String(!keyBindingsPanel.hidden)
+            );
+        }
+
+        keyBindingsToggle.addEventListener(
+            "click",
+            toggleKeyBindings
+        );
 
         function createButton(label, action, accessibleLabel) {
             const button = document.createElement("button");
@@ -171,7 +581,13 @@ window.MiniArcadeGames.tetris = {
 
             const handleClick = () => {
                 if (!paused && !gameOver && !destroyed) {
-                    action();
+                    const actionSucceeded = action();
+
+                    if (actionSucceeded !== false) {
+                        api.reportValidAction?.();
+                    } else {
+                        api.reportInvalidAction?.();
+                    }
                 }
             };
 
@@ -192,8 +608,12 @@ window.MiniArcadeGames.tetris = {
 
         sidebar.appendChild(nextTitle);
         sidebar.appendChild(nextCanvas);
+        sidebar.appendChild(difficultyLabel);
+        sidebar.appendChild(difficultySelect);
         sidebar.appendChild(linesDisplay);
         sidebar.appendChild(levelDisplay);
+        sidebar.appendChild(keyBindingsToggle);
+        sidebar.appendChild(keyBindingsPanel);
         gameLayout.appendChild(canvas);
         gameLayout.appendChild(sidebar);
         wrapper.appendChild(gameLayout);
@@ -315,11 +735,11 @@ window.MiniArcadeGames.tetris = {
 
         function rotatePiece(direction) {
             if (!currentPiece || paused || gameOver || destroyed) {
-                return;
+                return false;
             }
 
             if (currentPiece.type === "O") {
-                return;
+                return false;
             }
 
             const rotatedShape = rotateMatrix(
@@ -338,9 +758,11 @@ window.MiniArcadeGames.tetris = {
                     currentPiece.shape = rotatedShape;
                     currentPiece.x += kick;
                     draw();
-                    return;
+                    return true;
                 }
             }
+
+            return false;
         }
 
         function softDrop() {
@@ -350,11 +772,13 @@ window.MiniArcadeGames.tetris = {
             } else {
                 lockPiece();
             }
+
+            return true;
         }
 
         function hardDrop() {
             if (!currentPiece || paused || gameOver || destroyed) {
-                return;
+                return false;
             }
 
             let dropDistance = 0;
@@ -373,6 +797,7 @@ window.MiniArcadeGames.tetris = {
             score += dropDistance * 2;
             api.updateScore(score);
             lockPiece();
+            return true;
         }
 
         function lockPiece() {
@@ -645,7 +1070,7 @@ window.MiniArcadeGames.tetris = {
             if (paused) {
                 drawOverlay("已暫停", "按 P 或平台暫停按鈕繼續");
             } else if (gameOver) {
-                drawOverlay("遊戲結束", `得分 ${score}`);
+                drawOverlay("遊戲結束", `得分 ${score} · 按 A、D 或 ← / → 重玩`);
             }
         }
 
@@ -657,15 +1082,54 @@ window.MiniArcadeGames.tetris = {
             gameOver = true;
             stopGravityTimer();
             statusElement.textContent =
-                `遊戲結束，共消除 ${clearedLines} 列。`;
+                `遊戲結束，共消除 ${clearedLines} 列。按 A、D 或 ← / → 重玩。`;
             api.recordScore(score);
             draw();
         }
 
+        function resetForDifficulty() {
+            stopGravityTimer();
+            board.forEach(row => row.fill(null));
+            pieceBag = [];
+            currentPiece = null;
+            score = 0;
+            clearedLines = 0;
+            level = 1;
+            paused = false;
+            gameOver = false;
+            activeBindingAction = null;
+            linesDisplay.textContent = "消除 0 列";
+            levelDisplay.textContent = "等級 1";
+            statusElement.textContent =
+                `${difficulties[difficulty].label}難度：遊戲已重新開始。`;
+            renderKeyBindings();
+            api.markGameInProgress?.();
+            nextPieceType = takePieceType();
+            spawnPiece();
+            api.updateScore(score);
+            draw();
+            startGravityTimer();
+        }
+
+        function handleDifficultyChange() {
+            difficulty = difficultySelect.value;
+            window.MiniArcadeStorage.setSetting(
+                difficultySetting,
+                difficulty
+            );
+            resetForDifficulty();
+        }
+
         function getGravityDelay() {
+            const settings = difficulties[difficulty];
+
             return Math.max(
-                minimumGravityDelay,
-                gravityBaseDelay * Math.pow(0.82, level - 1)
+                settings.minimumGravityDelay,
+                settings.gravityBaseDelay *
+                    Math.pow(
+                        settings.gravityLevelMultiplier,
+                        level - 1
+                    )
             );
         }
 
@@ -708,9 +1172,13 @@ window.MiniArcadeGames.tetris = {
         }
 
         function handleKeyDown(event) {
+            if (handleKeyBindingCapture(event)) {
+                return;
+            }
+
             const key = event.key.toLowerCase();
 
-            if (key === "p") {
+            if (keyBindings.pause.includes(key)) {
                 event.preventDefault();
                 togglePause();
                 return;
@@ -720,30 +1188,42 @@ window.MiniArcadeGames.tetris = {
                 return;
             }
 
-            if (
-                key === "arrowleft" ||
-                key === "arrowright" ||
-                key === "arrowdown" ||
-                key === "arrowup" ||
-                key === "q" ||
-                key === "e" ||
-                key === " "
-            ) {
+            if (keyBindings.moveLeft.includes(key)) {
                 event.preventDefault();
-            }
-
-            if (key === "arrowleft" || key === "a") {
-                movePiece(-1, 0);
-            } else if (key === "arrowright" || key === "d") {
-                movePiece(1, 0);
-            } else if (key === "arrowdown" || key === "s") {
+                if (!movePiece(-1, 0)) {
+                    api.reportInvalidAction?.();
+                } else {
+                    api.reportValidAction?.();
+                }
+            } else if (keyBindings.moveRight.includes(key)) {
+                event.preventDefault();
+                if (!movePiece(1, 0)) {
+                    api.reportInvalidAction?.();
+                } else {
+                    api.reportValidAction?.();
+                }
+            } else if (keyBindings.softDrop.includes(key)) {
+                event.preventDefault();
                 softDrop();
-            } else if (key === "e") {
-                rotatePiece(1);
-            } else if (key === "q") {
-                rotatePiece(-1);
-            } else if (key === " ") {
+                api.reportValidAction?.();
+            } else if (keyBindings.rotateClockwise.includes(key)) {
+                event.preventDefault();
+                if (rotatePiece(1)) {
+                    api.reportValidAction?.();
+                } else {
+                    api.reportInvalidAction?.();
+                }
+            } else if (keyBindings.rotateCounterclockwise.includes(key)) {
+                event.preventDefault();
+                if (rotatePiece(-1)) {
+                    api.reportValidAction?.();
+                } else {
+                    api.reportInvalidAction?.();
+                }
+            } else if (keyBindings.hardDrop.includes(key)) {
+                event.preventDefault();
                 hardDrop();
+                api.reportValidAction?.();
             }
         }
 
@@ -754,6 +1234,21 @@ window.MiniArcadeGames.tetris = {
 
             destroyed = true;
             stopGravityTimer();
+            keyBindingsToggle.removeEventListener(
+                "click",
+                toggleKeyBindings
+            );
+            difficultySelect.removeEventListener(
+                "change",
+                handleDifficultyChange
+            );
+            keyBindingRows.forEach(({ addButton, handleClick }) => {
+                addButton.removeEventListener("click", handleClick);
+            });
+            restoreDefaultsButton.removeEventListener(
+                "click",
+                restoreDefaultKeyBindings
+            );
             document.removeEventListener(
                 "keydown",
                 handleKeyDown
@@ -765,6 +1260,10 @@ window.MiniArcadeGames.tetris = {
         }
 
         document.addEventListener("keydown", handleKeyDown);
+        difficultySelect.addEventListener(
+            "change",
+            handleDifficultyChange
+        );
 
         linesDisplay.textContent = "消除 0 列";
         levelDisplay.textContent = "等級 1";

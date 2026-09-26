@@ -268,7 +268,7 @@ window.MiniArcadeGames.snake = {
 
                 drawOverlayText(
                     "遊戲結束",
-                    `得分 ${score}`
+                    `得分 ${score} · 按 WASD 重新開始`
                 );
             }
 
@@ -578,6 +578,9 @@ window.MiniArcadeGames.snake = {
                         x: 0,
                         y: -1
                     };
+                    api.reportValidAction?.();
+                } else {
+                    api.reportInvalidAction?.();
                 }
             }
 
@@ -594,6 +597,9 @@ window.MiniArcadeGames.snake = {
                         x: 0,
                         y: 1
                     };
+                    api.reportValidAction?.();
+                } else {
+                    api.reportInvalidAction?.();
                 }
             }
 
@@ -610,6 +616,9 @@ window.MiniArcadeGames.snake = {
                         x: -1,
                         y: 0
                     };
+                    api.reportValidAction?.();
+                } else {
+                    api.reportInvalidAction?.();
                 }
             }
 
@@ -626,6 +635,9 @@ window.MiniArcadeGames.snake = {
                         x: 1,
                         y: 0
                     };
+                    api.reportValidAction?.();
+                } else {
+                    api.reportInvalidAction?.();
                 }
             }
         }

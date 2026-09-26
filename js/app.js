@@ -74,6 +74,15 @@
     const instructionsContent =
         document.getElementById("instructionsContent");
 
+    const gameStatus =
+        document.getElementById("gameStatus");
+
+    const gameStatusMessage =
+        document.getElementById("gameStatusMessage");
+
+    const dismissGameStatusButton =
+        document.getElementById("dismissGameStatusButton");
+
     const themeButton =
         document.getElementById("themeButton");
 
@@ -105,6 +114,17 @@
     let currentGame = null;
 
     let currentGameInstance = null;
+
+    const invalidActionThreshold = 3;
+    const invalidActionWindow = 8000;
+    let invalidActionCount = 0;
+    let firstInvalidActionAt = 0;
+    let hasShownInstructionHint = false;
+    let instructionHintShownAt = 0;
+    let instructionHintDismissTimer = null;
+    let hasReportedValidActionForHint = false;
+
+    let currentGameIsOver = false;
 
     const SORT_MODE_SETTING = "miniArcade_gameSortMode";
     const SORT_DIRECTION_SETTING_PREFIX =
@@ -502,6 +522,8 @@
         destroyCurrentGame();
 
         currentGame = game;
+        currentGameIsOver = false;
+        resetInvalidActionHint();
 
         gameTitle.textContent =
             game.name;
@@ -522,7 +544,10 @@
                 gameContainer,
                 {
                     updateScore,
-                    recordScore
+                    recordScore,
+                    markGameInProgress,
+                    reportInvalidAction,
+                    reportValidAction
                 }
             );
 
@@ -556,8 +581,10 @@
     function closeGame() {
 
         destroyCurrentGame();
+        resetInvalidActionHint();
 
         currentGame = null;
+        currentGameIsOver = false;
 
         gameModal.classList.add("hidden");
         gameModal.classList.remove(
@@ -585,6 +612,10 @@
             `分數 ${score}`;
     }
 
+    function markGameInProgress() {
+        currentGameIsOver = false;
+    }
+
     /**
      * 儲存遊戲結果
      */
@@ -593,6 +624,8 @@
         if (!currentGame) {
             return;
         }
+
+        currentGameIsOver = true;
 
         const result =
             MiniArcadeStorage.saveScore(
@@ -611,6 +644,132 @@
         return result;
     }
 
+    function reportInvalidAction() {
+        const now = Date.now();
+
+        if (
+            now - firstInvalidActionAt >
+            invalidActionWindow
+        ) {
+            invalidActionCount = 0;
+            firstInvalidActionAt = now;
+        }
+
+        invalidActionCount++;
+
+        if (
+            invalidActionCount >= invalidActionThreshold &&
+            !hasShownInstructionHint
+        ) {
+            hasShownInstructionHint = true;
+            instructionHintShownAt = now;
+            hasReportedValidActionForHint = false;
+            gameStatusMessage.textContent =
+                "操作不太順利嗎？點擊「遊戲說明」查看操作方式。";
+            gameStatus.hidden = false;
+            instructionsButton.classList.add(
+                "needs-attention"
+            );
+        }
+    }
+
+    function reportValidAction() {
+        if (
+            !hasShownInstructionHint ||
+            hasReportedValidActionForHint ||
+            Date.now() - instructionHintShownAt > 5000
+        ) {
+            return;
+        }
+
+        hasReportedValidActionForHint = true;
+        instructionHintDismissTimer = window.setTimeout(
+            dismissInstructionHint,
+            5000
+        );
+    }
+
+    function resetInvalidActionHint() {
+        if (instructionHintDismissTimer !== null) {
+            window.clearTimeout(instructionHintDismissTimer);
+            instructionHintDismissTimer = null;
+        }
+
+        invalidActionCount = 0;
+        firstInvalidActionAt = 0;
+        hasShownInstructionHint = false;
+        instructionHintShownAt = 0;
+        hasReportedValidActionForHint = false;
+
+        if (gameStatus) {
+            gameStatusMessage.textContent = "";
+            gameStatus.hidden = true;
+        }
+
+        if (instructionsButton) {
+            instructionsButton.classList.remove(
+                "needs-attention"
+            );
+        }
+    }
+
+    function dismissInstructionHint() {
+        if (instructionHintDismissTimer !== null) {
+            window.clearTimeout(instructionHintDismissTimer);
+            instructionHintDismissTimer = null;
+        }
+
+        gameStatus.hidden = true;
+        instructionsButton.classList.remove(
+            "needs-attention"
+        );
+    }
+
+    function handleUnhandledGameKey(event) {
+        if (
+            !currentGame ||
+            currentGameIsOver ||
+            !gameModal.classList.contains("is-open") ||
+            instructionsModal.classList.contains("is-open") ||
+            event.defaultPrevented ||
+            event.isComposing ||
+            [
+                "escape",
+                "tab",
+                "shift",
+                "control",
+                "alt",
+                "meta",
+                "capslock"
+            ].includes(event.key.toLowerCase()) ||
+            event.ctrlKey ||
+            event.altKey ||
+            event.metaKey ||
+            (
+                event.target instanceof HTMLElement &&
+                (
+                    event.target.isContentEditable ||
+                    event.target.closest(
+                        "input, textarea, select"
+                    ) ||
+                    (
+                        event.target.closest("button") &&
+                        ["enter", " "].includes(
+                            event.key.toLowerCase()
+                        )
+                    )
+                )
+            ) ||
+            gameContainer.querySelector(
+                ".tetris-key-binding.is-listening"
+            )
+        ) {
+            return;
+        }
+
+        reportInvalidAction();
+    }
+
     /* =========================================
        Restart
        ========================================= */
@@ -626,6 +785,17 @@
          * 舊的遊戲 instance。
          */
         openGame(currentGame);
+    }
+
+    function getGameOverRestartKeys(gameId) {
+        const restartKeysByGame = {
+            snake: ["w", "a", "s", "d"],
+            "2048": ["w", "a", "s", "d"],
+            tetris: ["a", "d", "arrowleft", "arrowright"],
+            "flappy-sky": [" "]
+        };
+
+        return restartKeysByGame[gameId] || ["r"];
     }
 
     /* =========================================
@@ -652,6 +822,8 @@
         if (!currentGame) {
             return;
         }
+
+        resetInvalidActionHint();
 
         instructionsContent.innerHTML =
             currentGame.instructions;
@@ -929,6 +1101,11 @@
             hideInstructions
         );
 
+        dismissGameStatusButton.addEventListener(
+            "click",
+            dismissInstructionHint
+        );
+
         /* 點擊說明背景 */
 
         instructionsModal.addEventListener(
@@ -937,7 +1114,11 @@
 
                 if (
                     event.target ===
-                    instructionsModal
+                        instructionsModal ||
+                    event.target ===
+                        instructionsModal.querySelector(
+                            ".modal-backdrop"
+                        )
                 ) {
 
                     hideInstructions();
@@ -950,6 +1131,34 @@
         document.addEventListener(
             "keydown",
             event => {
+                const restartKeys =
+                    currentGame
+                        ? getGameOverRestartKeys(currentGame.id)
+                        : [];
+
+                if (
+                    currentGameIsOver &&
+                    restartKeys.includes(event.key.toLowerCase()) &&
+                    !event.repeat &&
+                    gameModal.classList.contains("is-open") &&
+                    !instructionsModal.classList.contains("is-open") &&
+                    !gameContainer.querySelector(
+                        ".tetris-key-binding.is-listening"
+                    ) &&
+                    !(
+                        event.target instanceof HTMLElement &&
+                        (
+                            event.target.isContentEditable ||
+                            event.target.closest(
+                                "input, textarea, select"
+                            )
+                        )
+                    )
+                ) {
+                    event.preventDefault();
+                    restartGame();
+                    return;
+                }
 
                 if (event.key !== "Escape") {
                     return;
@@ -971,6 +1180,11 @@
                  * Escape 交給瀏覽器處理。
                  */
             }
+        );
+
+        window.addEventListener(
+            "keydown",
+            handleUnhandledGameKey
         );
     }
 

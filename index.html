@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="css/games/minesweeper.css">
     <link rel="stylesheet" href="css/games/tetris.css">
     <link rel="stylesheet" href="css/games/flappy-sky.css">
+    <link rel="stylesheet" href="css/games/drive-ahead.css">
 </head>
 
 <body>
@@ -167,7 +168,7 @@
 
                 <div class="library-controls">
                     <span id="gameCount" class="game-count">
-                        5 款遊戲
+                        6 款遊戲
                     </span>
 
                     <div class="sort-controls">
@@ -324,7 +325,20 @@
                 id="gameStatus"
                 class="game-status"
                 aria-live="polite"
-            ></div>
+                hidden
+            >
+                <span id="gameStatusMessage"></span>
+
+                <button
+                    id="dismissGameStatusButton"
+                    class="game-status-dismiss"
+                    type="button"
+                    aria-label="關閉操作提示"
+                    title="關閉提示"
+                >
+                    ×
+                </button>
+            </div>
 
             <!-- 遊戲 Footer -->
             <div class="game-footer">
@@ -388,6 +402,7 @@
     <script src="js/games/minesweeper.js"></script>
     <script src="js/games/tetris.js"></script>
     <script src="js/games/flappy-sky.js"></script>
+    <script src="js/games/drive-ahead.js"></script>
     <script src="js/app.js"></script>
 
 </body>

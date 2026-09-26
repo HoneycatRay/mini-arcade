@@ -913,6 +913,126 @@ button {
     border-top: 1px solid var(--border);
 }
 
+.game-status {
+
+    position: relative;
+
+    align-self: center;
+
+    width: fit-content;
+    max-width: calc(100% - 40px);
+
+    margin: 12px 20px 0;
+
+    padding: 8px 34px 8px 13px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 999px;
+
+    background: var(--surface);
+
+    color: var(--text-secondary);
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+    text-align: left;
+}
+
+.game-status-dismiss {
+
+    position: absolute;
+
+    top: 50%;
+    right: 3px;
+
+    width: 26px;
+    height: 26px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    transform: translateY(-50%);
+
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: var(--text-tertiary);
+
+    font-size: 20px;
+
+    line-height: 1;
+}
+
+.game-status-dismiss:hover {
+
+    background: var(--background);
+
+    color: var(--text-primary);
+}
+
+.game-status[hidden] {
+
+    display: none;
+}
+
+#instructionsButton.needs-attention {
+
+    position: relative;
+
+    border-color: var(--accent);
+
+    background: var(--surface-solid);
+
+    color: var(--accent);
+
+    box-shadow: 0 0 0 3px
+        color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+#instructionsButton.needs-attention::before {
+
+    content: "\2193";
+
+    position: absolute;
+
+    top: -30px;
+    left: 50%;
+
+    color: var(--accent);
+
+    font-size: 23px;
+    font-weight: 700;
+    line-height: 1;
+
+    transform: translateX(-50%);
+
+    animation: instructions-arrow-point 700ms ease-in-out infinite alternate;
+}
+
+@keyframes instructions-arrow-point {
+
+    from {
+        transform: translate(-50%, -2px);
+    }
+
+    to {
+        transform: translate(-50%, 3px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    #instructionsButton.needs-attention::before {
+        animation: none;
+    }
+}
+
 
 /* -----------------------------------------
    Instructions

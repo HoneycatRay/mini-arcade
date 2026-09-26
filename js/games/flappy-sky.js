@@ -41,6 +41,7 @@ window.MiniArcadeGames.flappySky = {
         const groundY = worldHeight - groundHeight;
         const birdX = 132;
         const birdRadius = 17;
+        const birdCollisionRadius = 14;
         const gravity = 1450;
         const flapVelocity = -450;
         const pipeWidth = 76;
@@ -117,6 +118,7 @@ window.MiniArcadeGames.flappySky = {
             pipeSpawnTimer = 0;
             previousFrameTime = null;
             pipes.push(createPipe(worldWidth + 70));
+            api.markGameInProgress?.();
             api.updateScore(score);
             statusElement.textContent =
                 "穿越水管之間的空隙，避開水管與地面。";
@@ -126,6 +128,8 @@ window.MiniArcadeGames.flappySky = {
             if (destroyed || paused) {
                 return;
             }
+
+            api.reportValidAction?.();
 
             if (state === "ready" || state === "game-over") {
                 resetGame();
@@ -164,7 +168,7 @@ window.MiniArcadeGames.flappySky = {
             const hitTopPipe = circleIntersectsRectangle(
                 birdX,
                 birdY,
-                birdRadius,
+                birdCollisionRadius,
                 pipe.x,
                 0,
                 pipeWidth,
@@ -173,7 +177,7 @@ window.MiniArcadeGames.flappySky = {
             const hitBottomPipe = circleIntersectsRectangle(
                 birdX,
                 birdY,
-                birdRadius,
+                birdCollisionRadius,
                 pipe.x,
                 pipe.gapBottom,
                 pipeWidth,
@@ -190,7 +194,7 @@ window.MiniArcadeGames.flappySky = {
 
             state = "game-over";
             statusElement.textContent =
-                `遊戲結束，通過 ${score} 組水管。點擊畫面或按空白鍵再試一次。`;
+                `遊戲結束，通過 ${score} 組水管。按空白鍵重新開始，或點擊畫面再試一次。`;
             api.recordScore(score);
         }
 
@@ -237,8 +241,8 @@ window.MiniArcadeGames.flappySky = {
             );
 
             if (
-                birdY - birdRadius < 0 ||
-                birdY + birdRadius >= groundY
+                birdY - birdCollisionRadius < 0 ||
+                birdY + birdCollisionRadius >= groundY
             ) {
                 finishGame();
             }
@@ -575,7 +579,7 @@ window.MiniArcadeGames.flappySky = {
             } else if (state === "game-over") {
                 drawMessage(
                     "遊戲結束",
-                    `通過 ${score} 組水管 · 點擊再玩一次`
+                    `通過 ${score} 組水管 · 按空白鍵重新開始`
                 );
             }
         }
