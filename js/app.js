@@ -37,6 +37,12 @@
     const gameCount =
         document.getElementById("gameCount");
 
+    const gameSortSelect =
+        document.getElementById("gameSortSelect");
+
+    const sortDirectionButton =
+        document.getElementById("sortDirectionButton");
+
     const gameModal =
         document.getElementById("gameModal");
 
@@ -87,6 +93,20 @@
 
     let currentGameInstance = null;
 
+    const SORT_MODE_SETTING = "miniArcade_gameSortMode";
+    const SORT_DIRECTION_SETTING_PREFIX =
+        "miniArcade_gameSortDirection_";
+    const SORT_MODES = ["recent", "name", "category"];
+
+    let sortMode =
+        MiniArcadeStorage.getSetting(SORT_MODE_SETTING);
+
+    if (!SORT_MODES.includes(sortMode)) {
+        sortMode = "recent";
+    }
+
+    let sortDirection = getSavedSortDirection(sortMode);
+
     /* =========================================
        Initialize
        ========================================= */
@@ -94,6 +114,8 @@
     function initializeApp() {
 
         initializeTheme();
+
+        initializeGameSorting();
 
         renderGameLibrary();
 
@@ -111,13 +133,126 @@
         gameCount.textContent =
             `${games.length} 款遊戲`;
 
-        games.forEach(game => {
+        getSortedGames().forEach(game => {
 
             const card =
                 createGameCard(game);
 
             gameGrid.appendChild(card);
         });
+    }
+
+    function getSortedGames() {
+        return games
+            .map((game, index) => ({
+                game,
+                index,
+                lastPlayed: MiniArcadeStorage.getLastPlayed(game.id)
+            }))
+            .sort((first, second) => {
+                let comparison = 0;
+
+                if (sortMode === "recent") {
+                    comparison = first.lastPlayed - second.lastPlayed;
+                } else {
+                    const firstValue =
+                        sortMode === "name"
+                            ? first.game.name
+                            : first.game.category;
+
+                    const secondValue =
+                        sortMode === "name"
+                            ? second.game.name
+                            : second.game.category;
+
+                    comparison = firstValue.localeCompare(
+                        secondValue,
+                        undefined,
+                        { sensitivity: "base" }
+                    );
+                }
+
+                return comparison === 0
+                    ? first.index - second.index
+                    : comparison *
+                        (sortDirection === "asc" ? 1 : -1);
+            })
+            .map(entry => entry.game);
+    }
+
+    function initializeGameSorting() {
+        gameSortSelect.value = sortMode;
+        updateSortDirectionButton();
+
+        gameSortSelect.addEventListener(
+            "change",
+            () => {
+                sortMode = gameSortSelect.value;
+                sortDirection = getSavedSortDirection(sortMode);
+                MiniArcadeStorage.setSetting(
+                    SORT_MODE_SETTING,
+                    sortMode
+                );
+                updateSortDirectionButton();
+                renderGameLibrary();
+            }
+        );
+
+        sortDirectionButton.addEventListener(
+            "click",
+            () => {
+                sortDirection =
+                    sortDirection === "asc" ? "desc" : "asc";
+
+                MiniArcadeStorage.setSetting(
+                    `${SORT_DIRECTION_SETTING_PREFIX}${sortMode}`,
+                    sortDirection
+                );
+
+                updateSortDirectionButton();
+                renderGameLibrary();
+            }
+        );
+    }
+
+    function getSavedSortDirection(mode) {
+        const savedDirection =
+            MiniArcadeStorage.getSetting(
+                `${SORT_DIRECTION_SETTING_PREFIX}${mode}`
+            );
+
+        if (savedDirection === "asc" || savedDirection === "desc") {
+            return savedDirection;
+        }
+
+        return mode === "recent" ? "desc" : "asc";
+    }
+
+    function updateSortDirectionButton() {
+        if (sortMode === "recent") {
+            const newestFirst = sortDirection === "desc";
+
+            sortDirectionButton.textContent =
+                newestFirst ? "↓ 最新優先" : "↑ 最早優先";
+            sortDirectionButton.setAttribute(
+                "aria-label",
+                newestFirst
+                    ? "切換為最早遊玩優先"
+                    : "切換為最近遊玩優先"
+            );
+            return;
+        }
+
+        const ascending = sortDirection === "asc";
+
+        sortDirectionButton.textContent =
+            ascending ? "↑ A 到 Z" : "↓ Z 到 A";
+        sortDirectionButton.setAttribute(
+            "aria-label",
+            ascending
+                ? "切換為 Z 到 A 排序"
+                : "切換為 A 到 Z 排序"
+        );
     }
 
     /**
@@ -230,6 +365,9 @@
                     recordScore
                 }
             );
+
+        MiniArcadeStorage.recordGamePlayed(game.id);
+        renderGameLibrary();
     }
 
     /* =========================================

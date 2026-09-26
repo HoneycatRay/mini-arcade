@@ -439,6 +439,65 @@ button {
     font-size: 14px;
 }
 
+.library-controls {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+}
+
+.sort-controls {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: var(--text-secondary);
+
+    font-size: 13px;
+}
+
+.sort-select,
+.sort-direction-button {
+
+    min-height: 38px;
+
+    padding: 0 12px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    background: var(--surface);
+
+    color: var(--text-primary);
+
+    font: inherit;
+}
+
+.sort-select {
+
+    cursor: pointer;
+}
+
+.sort-direction-button {
+
+    white-space: nowrap;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition);
+}
+
+.sort-direction-button:hover {
+
+    background: var(--surface-solid);
+}
+
 
 /* -----------------------------------------
    Game Grid
@@ -812,6 +871,31 @@ button {
         padding:
             20px
             60px;
+    }
+
+    .section-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 16px;
+    }
+
+    .library-controls {
+
+        width: 100%;
+
+        justify-content: space-between;
+
+        flex-wrap: wrap;
+
+        gap: 12px;
+    }
+
+    .sort-controls {
+
+        flex-wrap: wrap;
     }
 
 

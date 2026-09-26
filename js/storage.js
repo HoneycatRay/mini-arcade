@@ -15,6 +15,7 @@ window.MiniArcadeStorage = (() => {
     const BEST_PREFIX = "miniArcade_best_";
     const HISTORY_PREFIX = "miniArcade_history_";
     const DATA_PREFIX = "miniArcade_data_";
+    const LAST_PLAYED_PREFIX = "miniArcade_lastPlayed_";
 
     // 最多保留多少筆歷史紀錄
     const MAX_HISTORY = 20;
@@ -232,6 +233,21 @@ window.MiniArcadeStorage = (() => {
         return readGameData(gameId).history;
     }
 
+    function getLastPlayed(gameId) {
+        const timestamp = Number(
+            getRawValue(`${LAST_PLAYED_PREFIX}${gameId}`)
+        );
+
+        return Number.isFinite(timestamp) ? timestamp : 0;
+    }
+
+    function recordGamePlayed(gameId) {
+        return setRawValue(
+            `${LAST_PLAYED_PREFIX}${gameId}`,
+            String(Date.now())
+        );
+    }
+
     function getSetting(key) {
         return getRawValue(key);
     }
@@ -250,6 +266,7 @@ window.MiniArcadeStorage = (() => {
         removeRawValue(`${BEST_PREFIX}${gameId}`);
         removeRawValue(`${HISTORY_PREFIX}${gameId}`);
         removeRawValue(`${DATA_PREFIX}${gameId}`);
+        removeRawValue(`${LAST_PLAYED_PREFIX}${gameId}`);
     }
 
     /**
@@ -267,7 +284,8 @@ window.MiniArcadeStorage = (() => {
                     (
                         key.startsWith(BEST_PREFIX) ||
                         key.startsWith(HISTORY_PREFIX) ||
-                        key.startsWith(DATA_PREFIX)
+                        key.startsWith(DATA_PREFIX) ||
+                        key.startsWith(LAST_PLAYED_PREFIX)
                     )
                 ) {
                     keysToRemove.add(key);
@@ -281,7 +299,8 @@ window.MiniArcadeStorage = (() => {
             if (
                 key.startsWith(BEST_PREFIX) ||
                 key.startsWith(HISTORY_PREFIX) ||
-                key.startsWith(DATA_PREFIX)
+                key.startsWith(DATA_PREFIX) ||
+                key.startsWith(LAST_PLAYED_PREFIX)
             ) {
                 keysToRemove.add(key);
             }
@@ -294,6 +313,8 @@ window.MiniArcadeStorage = (() => {
         getBestScore,
         saveScore,
         getHistory,
+        getLastPlayed,
+        recordGamePlayed,
         getSetting,
         setSetting,
         clearGameData,

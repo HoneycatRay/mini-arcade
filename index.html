@@ -165,9 +165,35 @@
                     <h2>所有遊戲</h2>
                 </div>
 
-                <span id="gameCount" class="game-count">
-                    5 款遊戲
-                </span>
+                <div class="library-controls">
+                    <span id="gameCount" class="game-count">
+                        5 款遊戲
+                    </span>
+
+                    <div class="sort-controls">
+                        <label for="gameSortSelect">
+                            排序
+                        </label>
+
+                        <select
+                            id="gameSortSelect"
+                            class="sort-select"
+                        >
+                            <option value="recent">最近遊玩</option>
+                            <option value="name">名稱</option>
+                            <option value="category">類別</option>
+                        </select>
+
+                        <button
+                            id="sortDirectionButton"
+                            class="sort-direction-button"
+                            type="button"
+                            aria-label="切換排序方向"
+                        >
+                            ↓ 最新優先
+                        </button>
+                    </div>
+                </div>
 
             </div>
 
