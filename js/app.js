@@ -37,8 +37,21 @@
     const gameCount =
         document.getElementById("gameCount");
 
-    const gameSortSelect =
-        document.getElementById("gameSortSelect");
+    const gameSortButton =
+        document.getElementById("gameSortButton");
+
+    const gameSortValue =
+        document.getElementById("gameSortValue");
+
+    const gameSortMenu =
+        document.getElementById("gameSortMenu");
+
+    const gameSortOptions =
+        Array.from(
+            gameSortMenu.querySelectorAll(
+                "[data-sort-mode]"
+            )
+        );
 
     const sortDirectionButton =
         document.getElementById("sortDirectionButton");
@@ -181,20 +194,122 @@
     }
 
     function initializeGameSorting() {
-        gameSortSelect.value = sortMode;
+        updateSortMenu();
         updateSortDirectionButton();
 
-        gameSortSelect.addEventListener(
-            "change",
+        gameSortButton.addEventListener(
+            "click",
             () => {
-                sortMode = gameSortSelect.value;
+                if (gameSortMenu.hidden) {
+                    openSortMenu();
+                } else {
+                    closeSortMenu();
+                }
+            }
+        );
+
+        gameSortMenu.addEventListener(
+            "click",
+            event => {
+                const option = event.target.closest(
+                    "[data-sort-mode]"
+                );
+
+                if (!option) {
+                    return;
+                }
+
+                sortMode = option.dataset.sortMode;
                 sortDirection = getSavedSortDirection(sortMode);
                 MiniArcadeStorage.setSetting(
                     SORT_MODE_SETTING,
                     sortMode
                 );
+                updateSortMenu();
                 updateSortDirectionButton();
                 renderGameLibrary();
+                closeSortMenu();
+                gameSortButton.focus();
+            }
+        );
+
+        gameSortButton.addEventListener(
+            "keydown",
+            event => {
+                if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                    event.preventDefault();
+                    openSortMenu();
+                    focusSortOption(
+                        event.key === "ArrowDown"
+                            ? getCurrentSortOptionIndex()
+                            : (getCurrentSortOptionIndex() - 1 +
+                                gameSortOptions.length) %
+                                gameSortOptions.length
+                    );
+                }
+            }
+        );
+
+        gameSortMenu.addEventListener(
+            "keydown",
+            event => {
+                if (event.key === "Escape") {
+                    event.preventDefault();
+                    closeSortMenu();
+                    gameSortButton.focus();
+                    return;
+                }
+
+                const focusedIndex = gameSortOptions.indexOf(
+                    document.activeElement
+                );
+
+                if (
+                    event.key === "ArrowDown" ||
+                    event.key === "ArrowUp"
+                ) {
+                    event.preventDefault();
+                    const direction =
+                        event.key === "ArrowDown" ? 1 : -1;
+                    const nextIndex =
+                        (focusedIndex + direction +
+                            gameSortOptions.length) %
+                        gameSortOptions.length;
+
+                    focusSortOption(nextIndex);
+                } else if (event.key === "Home") {
+                    event.preventDefault();
+                    focusSortOption(0);
+                } else if (event.key === "End") {
+                    event.preventDefault();
+                    focusSortOption(gameSortOptions.length - 1);
+                }
+            }
+        );
+
+        gameSortMenu.addEventListener(
+            "focusout",
+            event => {
+                if (
+                    !gameSortButton.parentElement.contains(
+                        event.relatedTarget
+                    )
+                ) {
+                    closeSortMenu();
+                }
+            }
+        );
+
+        document.addEventListener(
+            "click",
+            event => {
+                if (
+                    !gameSortButton.parentElement.contains(
+                        event.target
+                    )
+                ) {
+                    closeSortMenu();
+                }
             }
         );
 
@@ -213,6 +328,51 @@
                 renderGameLibrary();
             }
         );
+    }
+
+    function updateSortMenu() {
+        const selectedOption = gameSortOptions.find(
+            option => option.dataset.sortMode === sortMode
+        );
+
+        if (!selectedOption) {
+            console.error(
+                "Mini Arcade：找不到對應的遊戲排序選項。",
+                sortMode
+            );
+            return;
+        }
+
+        gameSortValue.textContent =
+            selectedOption.textContent.trim();
+
+        gameSortOptions.forEach(option => {
+            option.setAttribute(
+                "aria-checked",
+                String(option === selectedOption)
+            );
+        });
+    }
+
+    function openSortMenu() {
+        gameSortMenu.hidden = false;
+        gameSortButton.setAttribute("aria-expanded", "true");
+        focusSortOption(getCurrentSortOptionIndex());
+    }
+
+    function closeSortMenu() {
+        gameSortMenu.hidden = true;
+        gameSortButton.setAttribute("aria-expanded", "false");
+    }
+
+    function getCurrentSortOptionIndex() {
+        return gameSortOptions.findIndex(
+            option => option.dataset.sortMode === sortMode
+        );
+    }
+
+    function focusSortOption(index) {
+        gameSortOptions[index]?.focus();
     }
 
     function getSavedSortDirection(mode) {
