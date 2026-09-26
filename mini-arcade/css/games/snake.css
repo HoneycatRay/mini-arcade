@@ -1,0 +1,63 @@
+/**
+ * Mini Arcade
+ * Snake Game Styles
+ */
+
+/* =========================================
+   Snake Game Container
+   ========================================= */
+
+.snake-game {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+}
+
+/* =========================================
+   Snake Canvas
+   ========================================= */
+
+.snake-canvas {
+    display: block;
+
+    width: min(500px, 100%);
+    height: auto;
+
+    aspect-ratio: 1 / 1;
+
+    border-radius: 22px;
+
+    background: #f5f5f7;
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+
+    touch-action: none;
+}
+
+/* Dark Mode */
+
+[data-theme="dark"] .snake-canvas {
+    background: #161618;
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.35),
+        0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* =========================================
+   Small Screen
+   ========================================= */
+
+@media (max-width: 600px) {
+    .snake-game {
+        padding: 0;
+    }
+
+    .snake-canvas {
+        border-radius: 18px;
+    }
+}
