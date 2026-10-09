@@ -54,6 +54,9 @@ Mini-Arcade/
 ├── index.html
 ├── README.md
 ├── .gitignore
+├── assets/
+│   └── icons/
+│       └── favicon.svg
 ├── css/
 │   ├── main.css
 │   └── games/
