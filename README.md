@@ -453,6 +453,8 @@ window.MiniArcadeGames = window.MiniArcadeGames || {};
 - 補充說明文件
 - 提升可維護性與架構品質
 
+開始前請參閱 [CONTRIBUTING.md](CONTRIBUTING.md)，了解本機執行、開發規範、測試與 Pull Request 流程。
+
 ## 結語
 
 Mini Arcade 是一個用來實驗「純前端離線遊戲平台」設計的輕量專案。它結合了簡潔的 UI、模組化架構與可維護的遊戲邏輯，讓遊戲開發與擴充���加容易。
