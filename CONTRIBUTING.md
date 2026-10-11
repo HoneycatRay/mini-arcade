@@ -1,0 +1,77 @@
+# 貢獻指南
+
+感謝你想為 Mini Arcade 貢獻！修正錯誤、改善遊戲體驗、加入遊戲或更新文件都很受歡迎。提交變更前，請先閱讀本指南並盡量維持專案簡單、離線、容易理解的特性。
+
+## 開發環境
+
+專案使用原生 HTML、CSS 和 JavaScript，沒有建置流程，也不需要安裝 npm 套件。
+
+- Git
+- Python 3（用來啟動本機 HTTP Server）
+- 現代瀏覽器，例如 Chrome、Edge 或 Safari
+
+在專案根目錄啟動伺服器：
+
+```bash
+python -m http.server 8000
+```
+
+接著開啟 <http://localhost:8000>。完成後，在執行伺服器的終端機按 `Ctrl+C` 停止。
+
+## 建議的 Git 流程
+
+若你不是此 Repository 的協作者，請先 Fork Repository，再將自己的 Fork 複製到本機。建立分支進行修改，不要直接在 `main` 上工作：
+
+```bash
+git switch -c feat/short-description
+```
+
+分支名稱可依變更類型使用 `feat/`、`fix/`、`docs/` 或 `refactor/` 等前綴。請讓每個 Pull Request 聚焦於一項目的，避免混入無關修改。
+
+提交訊息請簡短描述變更，例如：
+
+```text
+feat: add a new arcade game
+fix: stop the game timer on close
+docs: clarify local development steps
+```
+
+上述格式是建議，重點是讓提交內容清楚易懂。
+
+## 程式碼與架構規範
+
+- 維持原生 HTML、CSS、JavaScript 與傳統 `<script src="..."></script>` 載入方式；未經討論不要加入框架、打包工具或新的外部依賴。
+- 平台共用功能放在 `js/app.js`、`js/storage.js` 與 `css/main.css`；不要將特定遊戲的規則塞進平台核心。
+- 每款遊戲應有獨立的 `js/games/<game-id>.js` 與 `css/games/<game-id>.css`，並註冊到 `window.MiniArcadeGames`。平台會從註冊表載入遊戲。
+- 遊戲以 `launch(container, api)` 啟動，並回傳至少包含 `togglePause` 和 `destroy` 的物件。需要時才加入其他生命週期方法。
+- 分數及遊戲結果透過平台提供的 `api.updateScore()` 和 `api.recordScore()` 處理；遊戲資料依既有方式使用 `js/storage.js`，不要另外建立儲存系統。
+- 遊戲關閉或重新啟動時，請清除計時器、動畫與事件監聽器，避免重複啟動或背景執行。
+- 鍵盤操作只攔截遊戲實際使用的按鍵；使用方向鍵時適當呼叫 `event.preventDefault()`，避免頁面意外捲動。
+- 保持介面簡潔、回應式，並確認遊戲畫面不會在窄螢幕溢出。所有必要資源應放在 Repository 中，確保離線可用。
+- 若新增遊戲或樣式，請在 `index.html` 加入對應的 CSS 與 JavaScript `<script>`，並遵循既有的載入順序。
+- 請優先做範圍明確、必要的修改；若提議調整平台架構，請在 Pull Request 中說明原因與影響。
+
+## 測試與自我檢查
+
+目前 Repository 沒有設定自動化測試或建置指令。請使用上方的本機伺服器，在瀏覽器實際檢查變更；不要為了執行測試而額外引入套件或建置工具。
+
+依變更內容檢查以下項目：
+
+- 首頁載入正常，瀏覽器主控台沒有新增錯誤。
+- 遊戲可以啟動、操作、暫停、繼續、重新開始及關閉；關閉後再啟動時沒有重複的計時器或事件。
+- 分數、最高分與遊戲紀錄正常；若變更涉及資料儲存，請確認重新載入頁面後資料仍符合預期。
+- 鍵盤操作不會意外捲動頁面；遊戲畫面在桌面與窄螢幕尺寸下都沒有溢出。
+- 樣式或互動變更已在適用的瀏覽器確認。若無法測試某個平台或瀏覽器，請在 Pull Request 中註明。
+
+若修改只涉及文件，請檢查連結、命令與檔案路徑是否正確。
+
+## Pull Request
+
+提交 Pull Request 前，請同步目標分支的最新變更，確認差異中沒有無關檔案，並提供清楚的標題與說明。說明內容請包含：
+
+- 變更內容與原因
+- 如何驗證，以及驗證結果
+- 尚未驗證的項目或已知限制（若有）
+- UI 變更的截圖或短片（若有助於理解）
+
+若變更涉及遊戲規則、操作方式或平台共用行為，請在說明中交代預期行為與使用者可見的影響。維護者可能會要求補充說明或調整，感謝你一同讓 Mini Arcade 更好維護。
