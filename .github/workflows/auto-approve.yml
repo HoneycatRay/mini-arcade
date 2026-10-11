@@ -1,0 +1,27 @@
+name: Auto Approve Owner PR
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronized]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  auto-approve:
+    runs-on: ubuntu-latest
+    # 嚴格限制：只有當 PR 的提交者（作者）是您自己時才觸發
+    if: github.event.pull_request.user.login == 'HoneycatRay'
+
+    steps:
+      - name: Approve Pull Request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              event: 'APPROVE',
+              body: '🤖 偵測到儲存庫擁有者提交的 PR，由 GitHub Actions 自動審核通過。'
+            })
