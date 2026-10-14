@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>回報與建議 - Mini Arcade</title>
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/suggestion.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="suggestion-back-link" href="index.html">← 返回遊戲庫</a>
+        <div class="header-actions">
+            <button
+                id="themeButton"
+                class="icon-button"
+                type="button"
+                title="切換主題"
+                aria-label="切換主題"
+            >◐</button>
+        </div>
+    </header>
+
+    <main class="suggestion-main">
+        <section class="suggestion-intro" aria-labelledby="suggestionTitle">
+            <span class="eyebrow">HELP US IMPROVE</span>
+            <h1 id="suggestionTitle">回報問題或分享新點子</h1>
+            <p>遇到遊戲問題，或有想玩的新功能嗎？告訴我們。</p>
+        </section>
+
+        <form id="suggestionForm" class="suggestion-form">
+            <div class="suggestion-field">
+                <label for="suggestionType">回報類型 <span aria-hidden="true">*</span></label>
+                <select id="suggestionType" name="type" required>
+                    <option value="問題回報">回報問題</option>
+                    <option value="新功能建議">建議新功能</option>
+                </select>
+            </div>
+
+            <div class="suggestion-field">
+                <label for="suggestionTitleInput">標題 <span aria-hidden="true">*</span></label>
+                <input
+                    id="suggestionTitleInput"
+                    name="title"
+                    type="text"
+                    maxlength="120"
+                    autocomplete="off"
+                    placeholder="用一句話描述"
+                    required
+                >
+            </div>
+
+            <div class="suggestion-field">
+                <label for="suggestionGame">相關遊戲 <span class="field-optional">選填</span></label>
+                <select id="suggestionGame" name="game">
+                    <option value="">不指定 / 整個平台</option>
+                    <option value="貪吃蛇">貪吃蛇</option>
+                    <option value="2048">2048</option>
+                    <option value="踩地雷">踩地雷</option>
+                    <option value="俄羅斯方塊">俄羅斯方塊</option>
+                    <option value="Flappy Sky">Flappy Sky</option>
+                    <option value="Drive Ahead!">Drive Ahead!</option>
+                </select>
+            </div>
+
+            <div class="suggestion-field">
+                <label for="suggestionMessage">詳細描述 <span aria-hidden="true">*</span></label>
+                <textarea
+                    id="suggestionMessage"
+                    name="message"
+                    rows="6"
+                    maxlength="3000"
+                    placeholder="請描述遇到的情況，或你希望新增的功能。"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="suggestion-field">
+                <label for="suggestionEmail">聯絡 Email <span class="field-optional">選填</span></label>
+                <input
+                    id="suggestionEmail"
+                    name="email"
+                    type="email"
+                    maxlength="254"
+                    autocomplete="email"
+                    placeholder="若希望收到回覆，請留下 Email"
+                >
+            </div>
+
+            <p class="suggestion-privacy-note">
+                提交後，內容會傳送至 Formspree 以供專案維護者接收；請勿填寫密碼或其他敏感資訊。
+            </p>
+
+            <div class="suggestion-submit-row">
+                <button id="suggestionSubmit" class="primary-button" type="submit" disabled>
+                    送出回報
+                </button>
+                <p id="suggestionStatus" class="suggestion-status" role="status" aria-live="polite">
+                    回報服務尚未設定。設定 Formspree endpoint 後即可送出。
+                </p>
+            </div>
+        </form>
+    </main>
+
+    <footer id="siteFooter" class="site-footer"></footer>
+
+    <script src="js/storage.js"></script>
+    <script src="js/footer.js"></script>
+    <script src="js/suggestion.js"></script>
+</body>
+</html>

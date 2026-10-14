@@ -1,6 +1,6 @@
 # Mini Arcade
 
-Mini Arcade 是一個純前端、完全離線可運作的瀏覽器小遊戲平台，適合在 Windows 與 macOS 上直接本機執行。它由 HTML、CSS、JavaScript 組成，沒有後端服務，也不依賴任何外部 CDN 或套件管理工具，讓你可以在不連接網路的環境下直接開啟並遊玩。
+Mini Arcade 是一個純前端瀏覽器小遊戲平台，遊戲可離線遊玩，適合在 Windows 與 macOS 上直接本機執行。它由 HTML、CSS、JavaScript 組成，沒有自有後端服務，也不依賴外部 CDN 或套件管理工具。回報問題與功能建議的表單使用 Formspree，因此需要網路連線，且必須先設定表單 endpoint。
 
 這個專案的設計目標是：
 
@@ -36,7 +36,7 @@ Mini Arcade 目前是一個以「遊戲平台 + 獨立遊戲模組」為核心�
 
 ## 主要功能
 
-- 完全離線運作
+- 遊戲可離線運作（回報表單需連網）
 - 支援本機 HTTP Server 啟動
 - Apple-like / 極簡風格 UI
 - 深色 / 淺色主題切換
@@ -52,6 +52,7 @@ Mini Arcade 目前是一個以「遊戲平台 + 獨立遊戲模組」為核心�
 ```text
 Mini-Arcade/
 ├── index.html
+├── suggestion.html
 ├── README.md
 ├── .gitignore
 ├── assets/
@@ -59,6 +60,7 @@ Mini-Arcade/
 │       └── favicon.svg
 ├── css/
 │   ├── main.css
+│   ├── suggestion.css
 │   └── games/
 │       ├── 2048.css
 │       ├── drive-ahead.css
@@ -68,6 +70,8 @@ Mini-Arcade/
 │       └── tetris.css
 ├── js/
 │   ├── app.js
+│   ├── footer.js
+│   ├── suggestion.js
 │   ├── storage.js
 │   └── games/
 │       ├── 2048.js
@@ -202,6 +206,16 @@ http://localhost:8000
 
 為了保證主題設定、最高分與歷史紀錄都能正確保存，建議使用 `http://localhost:8000`。
 
+## 回報問題與功能建議
+
+`suggestion.html` 提供問題回報與新功能建議表單。表單會留在本站頁面送出，但需要 Formspree endpoint 才能收件：
+
+1. 在 Formspree 建立表單並完成服務端要求的驗證。
+2. 複製表單 endpoint（格式為 `https://formspree.io/f/表單代碼`）。
+3. 將 endpoint 填入 `js/suggestion.js` 的 `formspreeEndpoint`。
+
+尚未設定有效 endpoint 時，送出按鈕會停用並提示服務尚未設定。提交表單需要網路連線；表單資料會交由 Formspree 處理，請勿填寫密碼或其他敏感資訊。
+
 ## 執行環境要求
 
 Mini Arcade 是純前端專案，幾乎不需要額外依賴：
@@ -210,7 +224,7 @@ Mini Arcade 是純前端專案，幾乎不需要額外依賴：
 - 作業系統：Windows、macOS、Linux（本機開發）
 - 不需要 Node.js
 - 不需要 npm install
-- 不需要後端服務
+- 不需要自有後端服務（回報表單使用 Formspree）
 
 ## 技術實作說明
 
@@ -381,7 +395,7 @@ window.MiniArcadeGames = window.MiniArcadeGames || {};
 - 沒有複雜框架
 - 沒有前端建置流程
 - 沒有 TypeScript 編譯
-- 沒有後端依賴
+- 沒有自架後端依賴（回報表單需連線至 Formspree）
 - 沒有大規模狀態管理庫
 
 這對一個小型離線遊戲平台來說非常適合，因為它能讓專案更容易：
@@ -436,7 +450,7 @@ window.MiniArcadeGames = window.MiniArcadeGames || {};
 
 ### Q: 這個專案有後端嗎？
 
-沒有。這是一個純前端離線專案，不依賴任何後端 API。
+沒有自有後端。遊戲本身可離線運作；回報問題與建議功能使用 Formspree，需設定 endpoint 並連網送出。
 
 ## 授權
 

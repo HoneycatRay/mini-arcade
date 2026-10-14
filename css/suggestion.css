@@ -1,0 +1,141 @@
+.suggestion-back-link {
+    color: var(--text-secondary);
+    font-size: 14px;
+    text-decoration: none;
+    transition: color var(--transition);
+}
+
+.suggestion-back-link:hover {
+    color: var(--accent);
+}
+
+.suggestion-main {
+    width: min(100% - 40px, 720px);
+    margin: 0 auto;
+    padding: 72px 0 96px;
+}
+
+.suggestion-intro {
+    margin-bottom: 36px;
+}
+
+.suggestion-intro h1 {
+    margin: 0 0 12px;
+    font-size: clamp(30px, 5vw, 44px);
+    letter-spacing: -0.04em;
+}
+
+.suggestion-intro p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.suggestion-form {
+    display: grid;
+    gap: 22px;
+    padding: clamp(22px, 5vw, 36px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-medium);
+    background: var(--surface);
+    box-shadow: var(--shadow-small);
+}
+
+.suggestion-field {
+    display: grid;
+    gap: 9px;
+}
+
+.suggestion-field label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.suggestion-field label span[aria-hidden="true"] {
+    color: var(--accent);
+}
+
+.field-optional {
+    margin-left: 6px;
+    color: var(--text-tertiary);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.suggestion-field input,
+.suggestion-field select,
+.suggestion-field textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    outline: none;
+    background: var(--surface-solid);
+    color: var(--text-primary);
+    font: inherit;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.suggestion-field textarea {
+    min-height: 150px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.suggestion-field input:focus,
+.suggestion-field select:focus,
+.suggestion-field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.suggestion-field input::placeholder,
+.suggestion-field textarea::placeholder {
+    color: var(--text-tertiary);
+}
+
+.suggestion-privacy-note {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.suggestion-submit-row {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+}
+
+.suggestion-submit-row .primary-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+}
+
+.suggestion-status {
+    min-height: 1.5em;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.suggestion-status.is-error {
+    color: #c5221f;
+}
+
+[data-theme="dark"] .suggestion-status.is-error {
+    color: #ff8a80;
+}
+
+@media (max-width: 600px) {
+    .suggestion-main {
+        padding: 48px 0 64px;
+    }
+
+    .suggestion-form {
+        gap: 18px;
+    }
+}
